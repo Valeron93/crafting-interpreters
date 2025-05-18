@@ -4,33 +4,33 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/Valeron93/crafting-interpreters/expr"
+	"github.com/Valeron93/crafting-interpreters/ast"
 )
 
 type AstPrinter struct {
 }
 
-func (a *AstPrinter) VisitBinary(e *expr.Binary) any {
+func (a *AstPrinter) VisitBinaryExpr(e *ast.BinaryExpr) any {
 	return a.parenthesize(e.Operator.Lexeme, e.Left, e.Right)
 }
 
-func (a *AstPrinter) VisitGrouping(e *expr.Grouping) any {
+func (a *AstPrinter) VisitGroupingExpr(e *ast.GroupingExpr) any {
 	return a.parenthesize("group", e.Expression)
 }
 
-func (a *AstPrinter) VisitLiteral(e *expr.Literal) any {
+func (a *AstPrinter) VisitLiteralExpr(e *ast.LiteralExpr) any {
 	return fmt.Sprintf("%v", e.Value)
 }
 
-func (a *AstPrinter) VisitUnary(e *expr.Unary) any {
+func (a *AstPrinter) VisitUnaryExpr(e *ast.UnaryExpr) any {
 	return a.parenthesize(e.Operator.Lexeme, e.Right)
 }
 
-func (a *AstPrinter) Print(e expr.Expr) any {
+func (a *AstPrinter) Print(e ast.Expr) any {
 	return e.Accept(a)
 }
 
-func (a *AstPrinter) parenthesize(name string, exprs ...expr.Expr) string {
+func (a *AstPrinter) parenthesize(name string, exprs ...ast.Expr) string {
 	var sb strings.Builder
 
 	sb.WriteRune('(')

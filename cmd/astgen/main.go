@@ -17,7 +17,7 @@ type typ struct {
 	fields   []string
 }
 
-func generateStruct(w io.Writer, t typ) {
+func generateStruct(w io.Writer, t typ, basetype string) {
 
 	fmt.Fprintf(w, "type %v struct {\n", t.typename)
 
@@ -25,27 +25,27 @@ func generateStruct(w io.Writer, t typ) {
 		fmt.Fprintf(w, "\t%v\n", field)
 	}
 	fmt.Fprintf(w, "}\n\n")
-	generateStructMethods(w, t)
+	generateStructMethods(w, t, basetype)
 }
 
-func generateStructMethods(w io.Writer, t typ) {
+func generateStructMethods(w io.Writer, t typ, basetype string) {
 	firstSymbol := unicode.ToLower(rune(t.typename[0]))
-	fmt.Fprintf(w, "func (%c *%v) Accept(visitor ExprVisitor) any {\n", firstSymbol, t.typename)
+	fmt.Fprintf(w, "func (%c *%v) Accept(visitor %vVisitor) any {\n", firstSymbol, t.typename, basetype)
 	fmt.Fprintf(w, "\treturn visitor.Visit%v(%c)\n", t.typename, firstSymbol)
 	fmt.Fprintf(w, "}\n\n")
 }
 
-func generateVisitor(w io.Writer, types []typ) {
+func generateVisitor(w io.Writer, types []typ, basetype string) {
 
-	fmt.Fprintf(w, "type ExprVisitor interface {\n")
+	fmt.Fprintf(w, "type %vVisitor interface {\n", basetype)
 
 	for _, t := range types {
 		fmt.Fprintf(w, "\tVisit%v(*%v) any\n", t.typename, t.typename)
 	}
 	fmt.Fprintf(w, "}\n\n")
 
-	fmt.Fprintf(w, "type Expr interface {\n")
-	fmt.Fprintf(w, "\tAccept(ExprVisitor) any\n")
+	fmt.Fprintf(w, "type %v interface {\n", basetype)
+	fmt.Fprintf(w, "\tAccept(%vVisitor) any\n", basetype)
 	fmt.Fprintf(w, "}\n\n")
 
 }
@@ -70,7 +70,7 @@ func parseType(s string) (typ, error) {
 	}, nil
 }
 
-func generateFromAst(w io.Writer, ast []string) error {
+func generateFromAst(w io.Writer, ast []string, basetype string) error {
 	types := []typ{}
 	for _, s := range ast {
 		if len(s) > 0 {
@@ -85,9 +85,9 @@ func generateFromAst(w io.Writer, ast []string) error {
 			}
 		}
 	}
-	generateVisitor(w, types)
+	generateVisitor(w, types, basetype)
 	for _, t := range types {
-		generateStruct(w, t)
+		generateStruct(w, t, basetype)
 	}
 	return nil
 }
@@ -112,9 +112,10 @@ func readAstFromFile(path string) ([]string, error) {
 func main() {
 	outputFile := flag.String("o", "", "output go file")
 	inputFile := flag.String("i", "", "input ast file")
+	typename := flag.String("type", "", "Go base type name")
 	flag.Parse()
 
-	if len(*outputFile) == 0 || len(*inputFile) == 0 {
+	if len(*outputFile) == 0 || len(*inputFile) == 0 || len(*typename) == 0 {
 		flag.Usage()
 		os.Exit(64)
 	}
@@ -130,7 +131,7 @@ func main() {
 	fmt.Fprintf(file, "// DO NOT MODIFY!!! This file is generated from %v\n\n", *inputFile)
 
 	asts, err := readAstFromFile(*inputFile)
-	generateFromAst(file, asts)
+	generateFromAst(file, asts, *typename)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to generate types: %v\n", err)
 	}

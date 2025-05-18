@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/Valeron93/crafting-interpreters/parser"
 	"github.com/Valeron93/crafting-interpreters/scanner"
 )
 
@@ -30,8 +31,22 @@ func runString(code string) {
 		}
 	}
 
-	for _, token := range tokens {
-		fmt.Println(token)
+	p := parser.NewParser(tokens)
+	expression := p.Parse()
+
+	prt := AstPrinter{}
+
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Printf("runtime error: %s\n", r)
+		}
+	}()
+
+	if expression != nil {
+		printer := Interpreter{}
+		s := printer.Eval(expression)
+		fmt.Printf("ast: %v\n", prt.Print(expression))
+		fmt.Printf("%v\n", s)
 	}
 }
 
