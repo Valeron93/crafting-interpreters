@@ -34,8 +34,6 @@ func runString(code string) {
 	p := parser.NewParser(tokens)
 	expression := p.Parse()
 
-	prt := AstPrinter{}
-
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Printf("runtime error: %s\n", r)
@@ -43,10 +41,8 @@ func runString(code string) {
 	}()
 
 	if expression != nil {
-		printer := Interpreter{}
-		s := printer.Eval(expression)
-		fmt.Printf("ast: %v\n", prt.Print(expression))
-		fmt.Printf("%v\n", s)
+		i := Interpreter{}
+		i.Interpret(expression)
 	}
 }
 

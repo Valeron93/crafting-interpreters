@@ -1,3 +1,4 @@
-let lang_h23ello != "vl";
+print("Printing:");
+print("Hello, world!");
+print(1 + 1);
 
-print("Hello, world");

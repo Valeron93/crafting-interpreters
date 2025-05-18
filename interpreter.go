@@ -93,3 +93,23 @@ func (i *Interpreter) isTrue(obj any) bool {
 	}
 	return true
 }
+
+func (i *Interpreter) VisitExprStmt(stmt *ast.ExprStmt) any {
+	i.Eval(stmt.Expr)
+	return nil
+}
+
+func (i *Interpreter) VisitPrintStmt(stmt *ast.PrintStmt) any {
+	value := i.Eval(stmt.Expr)
+	fmt.Printf("%v\n", value)
+	return nil
+}
+
+func (i *Interpreter) Interpret(stmts []ast.Stmt) error {
+
+	for _, stmt := range stmts {
+		stmt.Accept(i)
+	}
+
+	return nil
+}

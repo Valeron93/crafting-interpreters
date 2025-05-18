@@ -187,6 +187,33 @@ func (p *Parser) primary() ast.Expr {
 	panic("unreachable")
 }
 
+func (p *Parser) statement() ast.Stmt {
+	if p.match(scanner.Print) {
+		return p.printStatement()
+	}
+	return p.expressionStatement()
+}
+
+func (p *Parser) expressionStatement() ast.Stmt {
+	expr := p.expression()
+	p.consume(scanner.Semicolon, "expected ';' after expression" )
+	return &ast.ExprStmt{
+		Expr: expr,
+	}
+}
+
+func (p *Parser) printStatement() ast.Stmt {
+
+	p.consume(scanner.LeftParen, "expected '(' after print")
+
+	value := p.expression()
+	p.consume(scanner.RightParen, "expected ')' after expression")
+	p.consume(scanner.Semicolon, "expected ';' after value")
+	return &ast.PrintStmt{
+		Expr: value,
+	}
+}
+
 func (p *Parser) sync() {
 	p.advance()
 
@@ -204,7 +231,7 @@ func (p *Parser) sync() {
 		p.advance()
 	}
 }
-func (p *Parser) Parse() ast.Expr {
+func (p *Parser) Parse() []ast.Stmt {
 
 	defer func() {
 		if r := recover(); r != nil {
@@ -212,5 +239,11 @@ func (p *Parser) Parse() ast.Expr {
 		}
 	}()
 
-	return p.expression()
+	stmts := make([]ast.Stmt, 0, 100)
+
+	for !p.isAtEnd() {
+		stmts = append(stmts, p.statement())
+	}
+
+	return stmts
 }
