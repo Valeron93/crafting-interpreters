@@ -20,7 +20,8 @@ func main() {
 	}
 }
 
-func runString(code string) {
+
+func runString(i *Interpreter, code string) {
 	scanner := scanner.NewScanner(code)
 
 	tokens, errors := scanner.ScanTokens()
@@ -41,7 +42,6 @@ func runString(code string) {
 	}()
 
 	if expression != nil {
-		i := Interpreter{}
 		i.Interpret(expression)
 	}
 }
@@ -52,9 +52,11 @@ func runFile(path string) {
 		fmt.Fprintf(os.Stderr, "failed to open file: %v\n", err)
 		os.Exit(1)
 	}
-	runString(string(bytes))
+	interpreter := NewInterpreter()
+	runString(&interpreter, string(bytes))
 }
 
+var replInterpreter = NewInterpreter()
 func runPrompt() {
 	scanner := bufio.NewScanner(os.Stdin)
 
@@ -64,6 +66,6 @@ func runPrompt() {
 			break
 		}
 		line := scanner.Text()
-		runString(line)
+		runString(&replInterpreter, line)
 	}
 }

@@ -2,9 +2,12 @@
 
 package ast
 
+import "github.com/Valeron93/crafting-interpreters/scanner"
+
 type StmtVisitor interface {
 	VisitExprStmt(*ExprStmt) any
 	VisitPrintStmt(*PrintStmt) any
+	VisitVarStmt(*VarStmt) any
 }
 
 type Stmt interface {
@@ -25,5 +28,14 @@ type PrintStmt struct {
 
 func (p *PrintStmt) Accept(visitor StmtVisitor) any {
 	return visitor.VisitPrintStmt(p)
+}
+
+type VarStmt struct {
+	Name scanner.Token
+	Init Expr
+}
+
+func (v *VarStmt) Accept(visitor StmtVisitor) any {
+	return visitor.VisitVarStmt(v)
 }
 

@@ -8,9 +8,41 @@ import (
 )
 
 type Interpreter struct {
+	env Environment
 }
 
-// VisitBinaryExpr implements expr.ExprVisitor.
+func (i *Interpreter) VisitAssignExpr(expr *ast.AssignExpr) any {
+	value := i.Eval(expr.Value)
+	i.env.Assign(expr.Name, value)
+	return value
+}
+
+func NewInterpreter() Interpreter {
+	return Interpreter{
+		env: Environment{
+			Globals: make(map[string]any),
+		},
+	}
+}
+
+func (i *Interpreter) VisitVarStmt(stmt *ast.VarStmt) any {
+	var value any
+	if stmt.Init != nil {
+		value = i.Eval(stmt.Init)
+	}
+	i.env.Define(stmt.Name, value)
+	return nil
+}
+
+func (i *Interpreter) VisitVarExpr(expr *ast.VarExpr) any {
+
+	value, err := i.env.Get(expr.Name)
+	if err != nil {
+		panic(err)
+	}
+	return value
+}
+
 func (i *Interpreter) VisitBinaryExpr(expr *ast.BinaryExpr) any {
 	left := i.Eval(expr.Left)
 	right := i.Eval(expr.Right)

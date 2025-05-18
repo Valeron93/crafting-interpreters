@@ -8,3 +8,5 @@ BinaryExpr     : Right Expr, Left Expr, Operator scanner.Token
 GroupingExpr   : Expression Expr
 LiteralExpr    : Value any
 UnaryExpr      : Operator scanner.Token, Right Expr
+VarExpr        : Name scanner.Token
+AssignExpr     : Name scanner.Token, Value Expr

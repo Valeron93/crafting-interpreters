@@ -9,6 +9,8 @@ type ExprVisitor interface {
 	VisitGroupingExpr(*GroupingExpr) any
 	VisitLiteralExpr(*LiteralExpr) any
 	VisitUnaryExpr(*UnaryExpr) any
+	VisitVarExpr(*VarExpr) any
+	VisitAssignExpr(*AssignExpr) any
 }
 
 type Expr interface {
@@ -48,5 +50,22 @@ type UnaryExpr struct {
 
 func (u *UnaryExpr) Accept(visitor ExprVisitor) any {
 	return visitor.VisitUnaryExpr(u)
+}
+
+type VarExpr struct {
+	Name scanner.Token
+}
+
+func (v *VarExpr) Accept(visitor ExprVisitor) any {
+	return visitor.VisitVarExpr(v)
+}
+
+type AssignExpr struct {
+	Name scanner.Token
+	Value Expr
+}
+
+func (a *AssignExpr) Accept(visitor ExprVisitor) any {
+	return visitor.VisitAssignExpr(a)
 }
 

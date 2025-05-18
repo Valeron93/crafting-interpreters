@@ -1,5 +1,8 @@
 #package ast
 #
+#import "github.com/Valeron93/crafting-interpreters/scanner"
+#
 
 ExprStmt  : Expr
 PrintStmt : Expr
+VarStmt   : Name scanner.Token, Init Expr

@@ -1,4 +1,17 @@
-print("Printing:");
-print("Hello, world!");
-print(1 + 1);
+let hello_world = "hello" + ", " + "world";
 
+print(hello_world);
+
+hello_world = 1000;
+print(hello_world);
+
+print("Addition:");
+
+let a = 100;
+
+print("A:");
+print(a);
+
+a = a + 1;
+print("a = a + 1");
+print(a);

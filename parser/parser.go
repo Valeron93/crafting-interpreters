@@ -73,7 +73,26 @@ func (p *Parser) consume(typ scanner.TokenType, err string) scanner.Token {
 }
 
 func (p *Parser) expression() ast.Expr {
-	return p.equality()
+	return p.assignment()
+}
+
+func (p *Parser) assignment() ast.Expr {
+	expr := p.equality()
+
+	if p.match(scanner.Equal) {
+		equals := p.prev()
+		value := p.assignment()
+
+		if varExpr, ok := expr.(*ast.VarExpr); ok {
+			name := varExpr.Name
+			return &ast.AssignExpr{
+				Name: name,
+				Value: value,
+			}
+		}
+		p.panic(equals, "invalid assignment target")
+	}
+	return expr
 }
 
 func (p *Parser) equality() ast.Expr {
@@ -175,6 +194,12 @@ func (p *Parser) primary() ast.Expr {
 		}
 	}
 
+	if p.match(scanner.Ident) {
+		return &ast.VarExpr{
+			Name: p.prev(),
+		}
+	}
+
 	if p.match(scanner.LeftParen) {
 		expression := p.expression()
 		p.consume(scanner.RightParen, "expected ')' after expression")
@@ -194,9 +219,33 @@ func (p *Parser) statement() ast.Stmt {
 	return p.expressionStatement()
 }
 
+func (p *Parser) declaration() ast.Stmt {
+
+	if p.match(scanner.Var) {
+		return p.varDeclaration()
+	}
+	return p.statement()
+}
+
+func (p *Parser) varDeclaration() ast.Stmt {
+	name := p.consume(scanner.Ident, "expected variable name")
+
+	var init ast.Expr
+
+	if p.match(scanner.Equal) {
+		init = p.expression()
+	}
+
+	p.consume(scanner.Semicolon, "expected ';' after variable declaration")
+	return &ast.VarStmt{
+		Name: name,
+		Init: init,
+	}
+}
+
 func (p *Parser) expressionStatement() ast.Stmt {
 	expr := p.expression()
-	p.consume(scanner.Semicolon, "expected ';' after expression" )
+	p.consume(scanner.Semicolon, "expected ';' after expression")
 	return &ast.ExprStmt{
 		Expr: expr,
 	}
@@ -242,7 +291,7 @@ func (p *Parser) Parse() []ast.Stmt {
 	stmts := make([]ast.Stmt, 0, 100)
 
 	for !p.isAtEnd() {
-		stmts = append(stmts, p.statement())
+		stmts = append(stmts, p.declaration())
 	}
 
 	return stmts
