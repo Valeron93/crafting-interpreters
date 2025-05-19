@@ -1,0 +1,5 @@
+let hello = "hello, world!";
+
+print(hello);
+hello = 1;
+print(hello);

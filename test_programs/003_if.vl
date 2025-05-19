@@ -1,27 +1,6 @@
-let hello_world = "hello" + ", " + "world";
-
-print(hello_world);
-
-hello_world = 1000;
-print(hello_world);
-
-print("Addition:");
-
-let a = 100;
-
-print("A:");
-print(a);
-
-a = a + 1;
-
-print("a = a + 1");
-print(a);
-
-
 print("should print 'if true branch':");
 if (true)
     print("if true branch");
-
 else
     print("if else branch");
 
@@ -41,8 +20,3 @@ else if (true)
 
 else
     print("if else branch");
-
-print(true and false);
-print(null or "yes");
-
-print("1" + 1);
