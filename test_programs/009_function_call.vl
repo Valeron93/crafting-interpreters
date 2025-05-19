@@ -6,5 +6,4 @@ for (let i = 0; i < 1000000; i = i + 1) {
 }
 
 let end = clock();
-print("counting took:");
-print(end - start);
+print("counting took: ", end - start);
