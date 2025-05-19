@@ -1,0 +1,9 @@
+let a = 0;
+let b = 1;
+
+while (a < 10000) {
+    print(a);
+    let c = a + b;
+    a = b;
+    b = c;
+}

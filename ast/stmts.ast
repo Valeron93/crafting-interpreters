@@ -8,3 +8,4 @@ PrintStmt : Expr
 VarStmt   : Name scanner.Token, Init Expr
 IfStmt    : Condition Expr, Then Stmt, Else Stmt
 BlockStmt : Statements []Stmt
+WhileStmt : Condition Expr, Body Stmt

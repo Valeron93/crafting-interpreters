@@ -305,6 +305,10 @@ func (p *Parser) statement() (ast.Stmt, error) {
 		return p.printStatement()
 	}
 
+	if p.match(scanner.While) {
+		return p.whileStatement()
+	}
+
 	if p.match(scanner.LeftBrace) {
 		stmts, err := p.block()
 		if err != nil {
@@ -316,6 +320,34 @@ func (p *Parser) statement() (ast.Stmt, error) {
 	}
 
 	return p.expressionStatement()
+}
+
+func (p *Parser) whileStatement() (ast.Stmt, error) {
+
+	_, err := p.consume(scanner.LeftParen, "expected '(' after while")
+	if err != nil {
+		return nil, err
+	}
+
+	condition, err := p.expression()
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = p.consume(scanner.RightParen, "expected ')' after while")
+	if err != nil {
+		return nil, err
+	}
+
+	body, err := p.statement()
+	if err != nil {
+		return nil, err
+	}
+
+	return &ast.WhileStmt{
+		Condition: condition,
+		Body:      body,
+	}, nil
 }
 
 func (p *Parser) block() ([]ast.Stmt, error) {
