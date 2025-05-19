@@ -5,6 +5,7 @@
 
 
 BinaryExpr     : Right Expr, Left Expr, Operator scanner.Token
+LogicalExpr    : Right Expr, Left Expr, Operator scanner.Token
 GroupingExpr   : Expression Expr
 LiteralExpr    : Value any
 UnaryExpr      : Operator scanner.Token, Right Expr

@@ -11,8 +11,6 @@ type Interpreter struct {
 	env Environment
 }
 
-
-
 func (i *Interpreter) VisitAssignExpr(expr *ast.AssignExpr) any {
 	value := i.Eval(expr.Value)
 	i.env.Assign(expr.Name, value)
@@ -140,13 +138,27 @@ func (i *Interpreter) VisitPrintStmt(stmt *ast.PrintStmt) any {
 }
 
 func (i *Interpreter) VisitIfStmt(stmt *ast.IfStmt) any {
-	
+
 	if i.isTrue(i.Eval(stmt.Condition)) {
 		i.execute(stmt.Then)
-	} else if (stmt.Else != nil) {
+	} else if stmt.Else != nil {
 		i.execute(stmt.Else)
 	}
 	return nil
+}
+
+func (i *Interpreter) VisitLogicalExpr(expr *ast.LogicalExpr) any {
+	left := i.Eval(expr.Left)
+	if expr.Operator.Type == scanner.Or {
+		if i.isTrue(left) {
+			return left
+		}
+	} else {
+		if !i.isTrue(left) {
+			return left
+		}
+	}
+	return i.Eval(expr.Right)
 }
 
 func (i *Interpreter) execute(stmt ast.Stmt) {

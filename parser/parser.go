@@ -82,7 +82,7 @@ func (p *Parser) expression() (ast.Expr, error) {
 }
 
 func (p *Parser) assignment() (ast.Expr, error) {
-	expr, err := p.equality()
+	expr, err := p.or()
 	if err != nil {
 		return nil, err
 	}
@@ -102,6 +102,50 @@ func (p *Parser) assignment() (ast.Expr, error) {
 			}, nil
 		}
 		return nil, p.reportError(equals, "invalid assignment")
+	}
+	return expr, nil
+}
+
+func (p *Parser) or() (ast.Expr, error) {
+	expr, err := p.and()
+	if err != nil {
+		return nil, err
+	}
+	for p.match(scanner.Or) {
+		operator := p.prev()
+		right, err := p.and()
+		if err != nil {
+			return nil, err
+		}
+
+		expr = &ast.LogicalExpr{
+			Left:     expr,
+			Right:    right,
+			Operator: operator,
+		}
+	}
+
+	return expr, nil
+}
+
+func (p *Parser) and() (ast.Expr, error) {
+	expr, err := p.equality()
+	if err != nil {
+		return nil, err
+	}
+
+	for p.match(scanner.And) {
+		operator := p.prev()
+		right, err := p.equality()
+		if err != nil {
+			return nil, err
+		}
+
+		expr = &ast.LogicalExpr{
+			Left:     expr,
+			Right:    right,
+			Operator: operator,
+		}
 	}
 	return expr, nil
 }
@@ -293,8 +337,8 @@ func (p *Parser) ifStatement() (ast.Stmt, error) {
 	}
 	return &ast.IfStmt{
 		Condition: condition,
-		Then: thenStmt,
-		Else: elseStmt,
+		Then:      thenStmt,
+		Else:      elseStmt,
 	}, nil
 
 }

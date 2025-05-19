@@ -41,3 +41,6 @@ else if (true)
 
 else
     print("if else branch");
+
+print(true and false);
+print(null or "yes");

@@ -6,6 +6,7 @@ import "github.com/Valeron93/crafting-interpreters/scanner"
 
 type ExprVisitor interface {
 	VisitBinaryExpr(*BinaryExpr) any
+	VisitLogicalExpr(*LogicalExpr) any
 	VisitGroupingExpr(*GroupingExpr) any
 	VisitLiteralExpr(*LiteralExpr) any
 	VisitUnaryExpr(*UnaryExpr) any
@@ -25,6 +26,16 @@ type BinaryExpr struct {
 
 func (b *BinaryExpr) Accept(visitor ExprVisitor) any {
 	return visitor.VisitBinaryExpr(b)
+}
+
+type LogicalExpr struct {
+	Right Expr
+	Left Expr
+	Operator scanner.Token
+}
+
+func (l *LogicalExpr) Accept(visitor ExprVisitor) any {
+	return visitor.VisitLogicalExpr(l)
 }
 
 type GroupingExpr struct {
