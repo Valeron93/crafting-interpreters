@@ -13,8 +13,8 @@ func (i *Interpreter) VisitVarStmt(stmt *ast.VarStmt) (any, error) {
 			return nil, err
 		}
 	}
-	i.env.Define(stmt.Name.Lexeme, value)
-	return nil, nil
+	err = i.env.Define(stmt.Name.Lexeme, value)
+	return nil, err
 }
 
 func (i *Interpreter) VisitExprStmt(stmt *ast.ExprStmt) (any, error) {
@@ -30,9 +30,13 @@ func (i *Interpreter) VisitIfStmt(stmt *ast.IfStmt) (any, error) {
 	}
 
 	if i.isTrue(cond) {
-		i.execute(stmt.Then)
+		if err = i.execute(stmt.Then); err != nil {
+			return nil, err
+		}
 	} else if stmt.Else != nil {
-		i.execute(stmt.Else)
+		if err = i.execute(stmt.Else); err != nil {
+			return nil, err
+		}
 	}
 	return nil, nil
 }
