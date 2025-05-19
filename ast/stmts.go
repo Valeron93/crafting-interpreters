@@ -8,6 +8,7 @@ type StmtVisitor interface {
 	VisitExprStmt(*ExprStmt) any
 	VisitPrintStmt(*PrintStmt) any
 	VisitVarStmt(*VarStmt) any
+	VisitIfStmt(*IfStmt) any
 }
 
 type Stmt interface {
@@ -37,5 +38,15 @@ type VarStmt struct {
 
 func (v *VarStmt) Accept(visitor StmtVisitor) any {
 	return visitor.VisitVarStmt(v)
+}
+
+type IfStmt struct {
+	Condition Expr
+	Then Stmt
+	Else Stmt
+}
+
+func (i *IfStmt) Accept(visitor StmtVisitor) any {
+	return visitor.VisitIfStmt(i)
 }
 

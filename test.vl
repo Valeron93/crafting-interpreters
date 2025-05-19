@@ -16,3 +16,28 @@ a = a + 1;
 
 print("a = a + 1");
 print(a);
+
+
+print("should print 'if true branch':");
+if (true)
+    print("if true branch");
+
+else
+    print("if else branch");
+
+print("should print 'if else branch'");
+if (false)
+    print("if true branch");
+
+else
+    print("if else branch");
+
+print("should print 'if else if branch':");
+if (false)
+    print("if true branch");
+
+else if (true)
+    print("if else if branch");
+
+else
+    print("if else branch");

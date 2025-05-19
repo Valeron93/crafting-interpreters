@@ -253,10 +253,50 @@ func (p *Parser) primary() (ast.Expr, error) {
 }
 
 func (p *Parser) statement() (ast.Stmt, error) {
+	if p.match(scanner.If) {
+		return p.ifStatement()
+	}
+
 	if p.match(scanner.Print) {
 		return p.printStatement()
 	}
 	return p.expressionStatement()
+}
+
+func (p *Parser) ifStatement() (ast.Stmt, error) {
+	_, err := p.consume(scanner.LeftParen, "expected '(' after 'if'")
+	if err != nil {
+		return nil, err
+	}
+
+	condition, err := p.expression()
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = p.consume(scanner.RightParen, "expected ')' after if condition")
+	if err != nil {
+		return nil, err
+	}
+
+	thenStmt, err := p.statement()
+	if err != nil {
+		return nil, err
+	}
+
+	var elseStmt ast.Stmt
+	if p.match(scanner.Else) {
+		elseStmt, err = p.statement()
+		if err != nil {
+			return nil, err
+		}
+	}
+	return &ast.IfStmt{
+		Condition: condition,
+		Then: thenStmt,
+		Else: elseStmt,
+	}, nil
+
 }
 
 func (p *Parser) declaration() (ast.Stmt, error) {
