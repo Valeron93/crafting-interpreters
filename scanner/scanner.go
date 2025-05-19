@@ -136,14 +136,14 @@ func (s *Scanner) scanToken() error {
 		} else {
 			s.addToken(Less)
 		}
-	
+
 	case '>':
 		if s.match('=') {
 			s.addToken(GreaterEqual)
 		} else {
 			s.addToken(Greater)
 		}
-		
+
 	default:
 		if isDigit(c) {
 			err := s.number()

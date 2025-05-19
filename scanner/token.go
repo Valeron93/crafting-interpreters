@@ -50,7 +50,6 @@ const (
 	EOF
 )
 
-
 var keywords = map[string]TokenType{
 	"and":   And,
 	"class": Class,

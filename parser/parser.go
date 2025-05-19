@@ -1,7 +1,5 @@
 package parser
 
-// TODO: change panics to go's errors
-
 import (
 	"fmt"
 
@@ -12,12 +10,14 @@ import (
 type Parser struct {
 	tokens  []scanner.Token
 	current int
+	errors  []error
 }
 
 func NewParser(tokens []scanner.Token) Parser {
 	return Parser{
 		tokens:  tokens,
 		current: 0,
+		errors:  make([]error, 0),
 	}
 }
 
@@ -59,48 +59,65 @@ func (p *Parser) prev() scanner.Token {
 	return p.tokens[p.current-1]
 }
 
-func (p *Parser) panic(token scanner.Token, err string) {
-	panic(fmt.Sprintf("error on line %v: %v", p.peek().Line, err))
+func (p *Parser) reportError(token scanner.Token, msg string) error {
+	err := fmt.Errorf("line %v: %v", token.Line, msg)
+	p.errors = append(p.errors, err)
+	return err
 }
 
-func (p *Parser) consume(typ scanner.TokenType, err string) scanner.Token {
+// TODO: fix
+func (p *Parser) consume(typ scanner.TokenType, msg string) (scanner.Token, error) {
 	if p.check(typ) {
-		return p.advance()
+		return p.advance(), nil
 	}
-
-	p.panic(p.peek(), err)
-	panic("unreachable")
+	if msg == "" {
+		return scanner.Token{}, p.reportError(p.peek(), fmt.Sprintf("expected %v, got: %v", typ, p.peek().Type))
+	} else {
+		return scanner.Token{}, p.reportError(p.peek(), msg)
+	}
 }
 
-func (p *Parser) expression() ast.Expr {
+func (p *Parser) expression() (ast.Expr, error) {
 	return p.assignment()
 }
 
-func (p *Parser) assignment() ast.Expr {
-	expr := p.equality()
+func (p *Parser) assignment() (ast.Expr, error) {
+	expr, err := p.equality()
+	if err != nil {
+		return nil, err
+	}
 
 	if p.match(scanner.Equal) {
 		equals := p.prev()
-		value := p.assignment()
+		value, err := p.assignment()
+		if err != nil {
+			return nil, err
+		}
 
 		if varExpr, ok := expr.(*ast.VarExpr); ok {
 			name := varExpr.Name
 			return &ast.AssignExpr{
-				Name: name,
+				Name:  name,
 				Value: value,
-			}
+			}, nil
 		}
-		p.panic(equals, "invalid assignment target")
+		return nil, p.reportError(equals, "invalid assignment")
 	}
-	return expr
+	return expr, nil
 }
 
-func (p *Parser) equality() ast.Expr {
-	expression := p.comparison()
+func (p *Parser) equality() (ast.Expr, error) {
+	expression, err := p.comparison()
+	if err != nil {
+		return nil, err
+	}
 
 	for p.match(scanner.BangEqual, scanner.EqualEqual) {
 		op := p.prev()
-		right := p.comparison()
+		right, err := p.comparison()
+		if err != nil {
+			return nil, err
+		}
 		expression = &ast.BinaryExpr{
 			Left:     expression,
 			Operator: op,
@@ -108,118 +125,141 @@ func (p *Parser) equality() ast.Expr {
 		}
 	}
 
-	return expression
+	return expression, nil
 }
 
-func (p *Parser) comparison() ast.Expr {
-	expression := p.term()
+func (p *Parser) comparison() (ast.Expr, error) {
+	expression, err := p.term()
+	if err != nil {
+		return nil, err
+	}
 
 	for p.match(scanner.Greater, scanner.GreaterEqual, scanner.Less, scanner.LessEqual) {
 		op := p.prev()
-		right := p.term()
+		right, err := p.term()
+		if err != nil {
+			return nil, err
+		}
 		expression = &ast.BinaryExpr{
 			Left:     expression,
 			Operator: op,
 			Right:    right,
 		}
 	}
-	return expression
+	return expression, nil
 }
 
-func (p *Parser) term() ast.Expr {
-	expression := p.factor()
+func (p *Parser) term() (ast.Expr, error) {
+	expression, err := p.factor()
+	if err != nil {
+		return nil, err
+	}
 
 	for p.match(scanner.Plus, scanner.Minus) {
 		op := p.prev()
-		right := p.factor()
+		right, err := p.factor()
+		if err != nil {
+			return nil, err
+		}
 		expression = &ast.BinaryExpr{
 			Left:     expression,
 			Operator: op,
 			Right:    right,
 		}
 	}
-	return expression
+	return expression, nil
 }
 
-func (p *Parser) factor() ast.Expr {
-	expression := p.unary()
+func (p *Parser) factor() (ast.Expr, error) {
+	expression, err := p.unary()
+	if err != nil {
+		return nil, err
+	}
 
 	for p.match(scanner.Star, scanner.Slash) {
 		op := p.prev()
-		right := p.unary()
+		right, err := p.unary()
+		if err != nil {
+			return nil, err
+		}
 		expression = &ast.BinaryExpr{
 			Left:     expression,
 			Operator: op,
 			Right:    right,
 		}
 	}
-	return expression
+	return expression, nil
 }
 
-func (p *Parser) unary() ast.Expr {
+func (p *Parser) unary() (ast.Expr, error) {
 	if p.match(scanner.Bang, scanner.Minus) {
 		op := p.prev()
-		right := p.unary()
+		right, err := p.unary()
 		return &ast.UnaryExpr{
 			Operator: op,
 			Right:    right,
-		}
+		}, err
 	}
 
 	return p.primary()
 }
 
-func (p *Parser) primary() ast.Expr {
+func (p *Parser) primary() (ast.Expr, error) {
 	if p.match(scanner.False) {
 		return &ast.LiteralExpr{
 			Value: false,
-		}
+		}, nil
 	}
 
 	if p.match(scanner.True) {
 		return &ast.LiteralExpr{
 			Value: true,
-		}
+		}, nil
 	}
 
 	if p.match(scanner.Nil) {
 		return &ast.LiteralExpr{
 			Value: nil,
-		}
+		}, nil
 	}
 
 	if p.match(scanner.Number, scanner.String) {
 		return &ast.LiteralExpr{
 			Value: p.prev().Literal,
-		}
+		}, nil
 	}
 
 	if p.match(scanner.Ident) {
 		return &ast.VarExpr{
 			Name: p.prev(),
-		}
+		}, nil
 	}
 
 	if p.match(scanner.LeftParen) {
-		expression := p.expression()
-		p.consume(scanner.RightParen, "expected ')' after expression")
+		expression, err := p.expression()
+		if err != nil {
+			return nil, err
+		}
+		_, err = p.consume(scanner.RightParen, "expected ')' after expression")
+		if err != nil {
+			return nil, err
+		}
 		return &ast.GroupingExpr{
 			Expression: expression,
-		}
+		}, nil
 	}
 
-	p.panic(p.peek(), "expected expression")
-	panic("unreachable")
+	return nil, p.reportError(p.peek(), "expected expression")
 }
 
-func (p *Parser) statement() ast.Stmt {
+func (p *Parser) statement() (ast.Stmt, error) {
 	if p.match(scanner.Print) {
 		return p.printStatement()
 	}
 	return p.expressionStatement()
 }
 
-func (p *Parser) declaration() ast.Stmt {
+func (p *Parser) declaration() (ast.Stmt, error) {
 
 	if p.match(scanner.Var) {
 		return p.varDeclaration()
@@ -227,40 +267,69 @@ func (p *Parser) declaration() ast.Stmt {
 	return p.statement()
 }
 
-func (p *Parser) varDeclaration() ast.Stmt {
-	name := p.consume(scanner.Ident, "expected variable name")
+func (p *Parser) varDeclaration() (ast.Stmt, error) {
+	name, err := p.consume(scanner.Ident, "expected variable name")
+	if err != nil {
+		return nil, err
+	}
 
 	var init ast.Expr
 
 	if p.match(scanner.Equal) {
-		init = p.expression()
+		init, err = p.expression()
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	p.consume(scanner.Semicolon, "expected ';' after variable declaration")
+	_, err = p.consume(scanner.Semicolon, "expected ';' after variable declaration")
+	if err != nil {
+		return nil, err
+	}
 	return &ast.VarStmt{
 		Name: name,
 		Init: init,
-	}
+	}, nil
 }
 
-func (p *Parser) expressionStatement() ast.Stmt {
-	expr := p.expression()
-	p.consume(scanner.Semicolon, "expected ';' after expression")
+func (p *Parser) expressionStatement() (ast.Stmt, error) {
+	expr, err := p.expression()
+	if err != nil {
+		return nil, err
+	}
+	_, err = p.consume(scanner.Semicolon, "expected ';' after expression")
+	if err != nil {
+		return nil, err
+	}
 	return &ast.ExprStmt{
 		Expr: expr,
-	}
+	}, nil
 }
 
-func (p *Parser) printStatement() ast.Stmt {
+func (p *Parser) printStatement() (ast.Stmt, error) {
 
-	p.consume(scanner.LeftParen, "expected '(' after print")
+	_, err := p.consume(scanner.LeftParen, "expected '(' after print")
+	if err != nil {
+		return nil, err
+	}
 
-	value := p.expression()
-	p.consume(scanner.RightParen, "expected ')' after expression")
-	p.consume(scanner.Semicolon, "expected ';' after value")
+	value, err := p.expression()
+	if err != nil {
+		return nil, err
+	}
+	_, err = p.consume(scanner.RightParen, "expected ')' after expression")
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = p.consume(scanner.Semicolon, "expected ';' after statement")
+	if err != nil {
+		return nil, err
+	}
+
 	return &ast.PrintStmt{
 		Expr: value,
-	}
+	}, nil
 }
 
 func (p *Parser) sync() {
@@ -280,19 +349,19 @@ func (p *Parser) sync() {
 		p.advance()
 	}
 }
-func (p *Parser) Parse() []ast.Stmt {
-
-	defer func() {
-		if r := recover(); r != nil {
-			fmt.Println(r)
-		}
-	}()
+func (p *Parser) Parse() ([]ast.Stmt, []error) {
 
 	stmts := make([]ast.Stmt, 0, 100)
 
 	for !p.isAtEnd() {
-		stmts = append(stmts, p.declaration())
+
+		stmt, err := p.declaration()
+		if err != nil {
+			p.sync()
+		} else {
+			stmts = append(stmts, stmt)
+		}
 	}
 
-	return stmts
+	return stmts, p.errors
 }

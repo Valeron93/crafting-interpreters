@@ -20,7 +20,6 @@ func main() {
 	}
 }
 
-
 func runString(i *Interpreter, code string) {
 	scanner := scanner.NewScanner(code)
 
@@ -30,10 +29,17 @@ func runString(i *Interpreter, code string) {
 		for _, err := range errors {
 			fmt.Fprintf(os.Stderr, "%v\n", err)
 		}
+		os.Exit(1)
 	}
 
 	p := parser.NewParser(tokens)
-	expression := p.Parse()
+	expression, errors := p.Parse()
+	if len(errors) > 0 {
+		for _, err := range errors {
+			fmt.Fprintf(os.Stderr, "%v\n", err)
+		}
+		os.Exit(1)
+	}
 
 	defer func() {
 		if r := recover(); r != nil {
@@ -57,6 +63,7 @@ func runFile(path string) {
 }
 
 var replInterpreter = NewInterpreter()
+
 func runPrompt() {
 	scanner := bufio.NewScanner(os.Stdin)
 
