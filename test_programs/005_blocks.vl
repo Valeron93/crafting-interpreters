@@ -1,0 +1,16 @@
+let x = "global hello";
+print(x);
+
+if (true) {
+    let x = "shadowed hello x1";
+    print(x);
+    {
+        let x = "shadowed hello x2";
+        print(x);
+    }
+
+} else {
+    print("false");
+}
+
+print(x);

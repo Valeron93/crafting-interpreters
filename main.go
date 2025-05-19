@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/Valeron93/crafting-interpreters/interpreter"
 	"github.com/Valeron93/crafting-interpreters/parser"
 	"github.com/Valeron93/crafting-interpreters/scanner"
 	"github.com/chzyer/readline"
@@ -21,7 +22,7 @@ func main() {
 	}
 }
 
-func runString(i *Interpreter, code string) error {
+func runString(i *interpreter.Interpreter, code string) error {
 	scanner := scanner.NewScanner(code)
 
 	tokens, errs := scanner.ScanTokens()
@@ -56,14 +57,14 @@ func runFile(path string) {
 		fmt.Fprintf(os.Stderr, "failed to open file: %v\n", err)
 		os.Exit(1)
 	}
-	interpreter := NewInterpreter()
+	interpreter := interpreter.New()
 	if err := runString(&interpreter, string(bytes)); err != nil {
 		fmt.Fprintf(os.Stderr, "runtime error: %v\n", err)
 		os.Exit(1)
 	}
 }
 
-var replInterpreter = NewInterpreter()
+var replInterpreter = interpreter.New()
 
 func runPrompt() {
 

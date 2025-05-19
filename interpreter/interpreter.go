@@ -1,4 +1,4 @@
-package main
+package interpreter
 
 import (
 	"errors"
@@ -9,7 +9,7 @@ import (
 )
 
 type Interpreter struct {
-	env Environment
+	env *Environment
 }
 
 func (i *Interpreter) VisitAssignExpr(expr *ast.AssignExpr) (any, error) {
@@ -24,11 +24,9 @@ func (i *Interpreter) VisitAssignExpr(expr *ast.AssignExpr) (any, error) {
 	return value, nil
 }
 
-func NewInterpreter() Interpreter {
+func New() Interpreter {
 	return Interpreter{
-		env: Environment{
-			Globals: make(map[string]any),
-		},
+		env: NewEnvironment(),
 	}
 }
 
@@ -195,6 +193,32 @@ func (i *Interpreter) VisitIfStmt(stmt *ast.IfStmt) (any, error) {
 		i.execute(stmt.Else)
 	}
 	return nil, nil
+}
+
+func (i *Interpreter) VisitBlockStmt(stmt *ast.BlockStmt) (any, error) {
+	subEnv := NewSubEnvironment(i.env)
+	err := i.executeBlock(stmt.Statements, subEnv)
+	if err != nil {
+		return nil, err
+	}
+	return nil, nil
+}
+
+func (i *Interpreter) executeBlock(stmts []ast.Stmt, env *Environment) error {
+	prevEnv := i.env
+
+	defer func() {
+		i.env = prevEnv
+	}()
+
+	i.env = env
+	for _, stmt := range stmts {
+		err := i.execute(stmt)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (i *Interpreter) VisitLogicalExpr(expr *ast.LogicalExpr) (any, error) {

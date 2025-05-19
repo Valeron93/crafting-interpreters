@@ -9,6 +9,7 @@ type StmtVisitor interface {
 	VisitPrintStmt(*PrintStmt) (any, error)
 	VisitVarStmt(*VarStmt) (any, error)
 	VisitIfStmt(*IfStmt) (any, error)
+	VisitBlockStmt(*BlockStmt) (any, error)
 }
 
 type Stmt interface {
@@ -48,5 +49,13 @@ type IfStmt struct {
 
 func (i *IfStmt) Accept(visitor StmtVisitor) (any, error) {
 	return visitor.VisitIfStmt(i)
+}
+
+type BlockStmt struct {
+	Statements []Stmt
+}
+
+func (b *BlockStmt) Accept(visitor StmtVisitor) (any, error) {
+	return visitor.VisitBlockStmt(b)
 }
 

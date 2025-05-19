@@ -7,3 +7,4 @@ ExprStmt  : Expr
 PrintStmt : Expr
 VarStmt   : Name scanner.Token, Init Expr
 IfStmt    : Condition Expr, Then Stmt, Else Stmt
+BlockStmt : Statements []Stmt

@@ -304,7 +304,34 @@ func (p *Parser) statement() (ast.Stmt, error) {
 	if p.match(scanner.Print) {
 		return p.printStatement()
 	}
+
+	if p.match(scanner.LeftBrace) {
+		stmts, err := p.block()
+		if err != nil {
+			return nil, err
+		}
+		return &ast.BlockStmt{
+			Statements: stmts,
+		}, nil
+	}
+
 	return p.expressionStatement()
+}
+
+func (p *Parser) block() ([]ast.Stmt, error) {
+
+	stmts := make([]ast.Stmt, 0, 10)
+
+	for !p.check(scanner.RightBrace) {
+		declaration, err := p.declaration()
+		if err != nil {
+			return nil, err
+		}
+		stmts = append(stmts, declaration)
+	}
+	_, err := p.consume(scanner.RightBrace, "expected '}' after block")
+	return stmts, err
+
 }
 
 func (p *Parser) ifStatement() (ast.Stmt, error) {
