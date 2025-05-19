@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"os"
 
@@ -20,36 +21,33 @@ func main() {
 	}
 }
 
-func runString(i *Interpreter, code string) {
+func runString(i *Interpreter, code string) error {
 	scanner := scanner.NewScanner(code)
 
-	tokens, errors := scanner.ScanTokens()
+	tokens, errs := scanner.ScanTokens()
 
-	if len(errors) > 0 {
-		for _, err := range errors {
+	if len(errs) > 0 {
+		for _, err := range errs {
 			fmt.Fprintf(os.Stderr, "%v\n", err)
 		}
-		os.Exit(1)
+		return errors.New("failed to scan")
 	}
 
 	p := parser.NewParser(tokens)
-	expression, errors := p.Parse()
-	if len(errors) > 0 {
-		for _, err := range errors {
+	expression, errs := p.Parse()
+	if len(errs) > 0 {
+		for _, err := range errs {
 			fmt.Fprintf(os.Stderr, "%v\n", err)
 		}
-		os.Exit(1)
+		return errors.New("failed to parse")
 	}
-
-	defer func() {
-		if r := recover(); r != nil {
-			fmt.Printf("runtime error: %s\n", r)
-		}
-	}()
 
 	if expression != nil {
-		i.Interpret(expression)
+		if err := i.Interpret(expression); err != nil {
+			return err
+		}
 	}
+	return nil
 }
 
 func runFile(path string) {
@@ -59,7 +57,10 @@ func runFile(path string) {
 		os.Exit(1)
 	}
 	interpreter := NewInterpreter()
-	runString(&interpreter, string(bytes))
+	if err := runString(&interpreter, string(bytes)); err != nil {
+		fmt.Fprintf(os.Stderr, "runtime error: %v\n", err)
+		os.Exit(1)
+	}
 }
 
 var replInterpreter = NewInterpreter()
@@ -73,6 +74,8 @@ func runPrompt() {
 			break
 		}
 		line := scanner.Text()
-		runString(&replInterpreter, line)
+		if err := runString(&replInterpreter, line); err != nil {
+			fmt.Fprintf(os.Stderr, "runtime error: %v\n", err)
+		}
 	}
 }

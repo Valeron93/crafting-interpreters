@@ -5,17 +5,17 @@ package ast
 import "github.com/Valeron93/crafting-interpreters/scanner"
 
 type ExprVisitor interface {
-	VisitBinaryExpr(*BinaryExpr) any
-	VisitLogicalExpr(*LogicalExpr) any
-	VisitGroupingExpr(*GroupingExpr) any
-	VisitLiteralExpr(*LiteralExpr) any
-	VisitUnaryExpr(*UnaryExpr) any
-	VisitVarExpr(*VarExpr) any
-	VisitAssignExpr(*AssignExpr) any
+	VisitBinaryExpr(*BinaryExpr) (any, error)
+	VisitLogicalExpr(*LogicalExpr) (any, error)
+	VisitGroupingExpr(*GroupingExpr) (any, error)
+	VisitLiteralExpr(*LiteralExpr) (any, error)
+	VisitUnaryExpr(*UnaryExpr) (any, error)
+	VisitVarExpr(*VarExpr) (any, error)
+	VisitAssignExpr(*AssignExpr) (any, error)
 }
 
 type Expr interface {
-	Accept(ExprVisitor) any
+	Accept(ExprVisitor) (any, error)
 }
 
 type BinaryExpr struct {
@@ -24,7 +24,7 @@ type BinaryExpr struct {
 	Operator scanner.Token
 }
 
-func (b *BinaryExpr) Accept(visitor ExprVisitor) any {
+func (b *BinaryExpr) Accept(visitor ExprVisitor) (any, error) {
 	return visitor.VisitBinaryExpr(b)
 }
 
@@ -34,7 +34,7 @@ type LogicalExpr struct {
 	Operator scanner.Token
 }
 
-func (l *LogicalExpr) Accept(visitor ExprVisitor) any {
+func (l *LogicalExpr) Accept(visitor ExprVisitor) (any, error) {
 	return visitor.VisitLogicalExpr(l)
 }
 
@@ -42,7 +42,7 @@ type GroupingExpr struct {
 	Expression Expr
 }
 
-func (g *GroupingExpr) Accept(visitor ExprVisitor) any {
+func (g *GroupingExpr) Accept(visitor ExprVisitor) (any, error) {
 	return visitor.VisitGroupingExpr(g)
 }
 
@@ -50,7 +50,7 @@ type LiteralExpr struct {
 	Value any
 }
 
-func (l *LiteralExpr) Accept(visitor ExprVisitor) any {
+func (l *LiteralExpr) Accept(visitor ExprVisitor) (any, error) {
 	return visitor.VisitLiteralExpr(l)
 }
 
@@ -59,7 +59,7 @@ type UnaryExpr struct {
 	Right Expr
 }
 
-func (u *UnaryExpr) Accept(visitor ExprVisitor) any {
+func (u *UnaryExpr) Accept(visitor ExprVisitor) (any, error) {
 	return visitor.VisitUnaryExpr(u)
 }
 
@@ -67,7 +67,7 @@ type VarExpr struct {
 	Name scanner.Token
 }
 
-func (v *VarExpr) Accept(visitor ExprVisitor) any {
+func (v *VarExpr) Accept(visitor ExprVisitor) (any, error) {
 	return visitor.VisitVarExpr(v)
 }
 
@@ -76,7 +76,7 @@ type AssignExpr struct {
 	Value Expr
 }
 
-func (a *AssignExpr) Accept(visitor ExprVisitor) any {
+func (a *AssignExpr) Accept(visitor ExprVisitor) (any, error) {
 	return visitor.VisitAssignExpr(a)
 }
 

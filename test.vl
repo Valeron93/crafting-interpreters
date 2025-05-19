@@ -44,3 +44,5 @@ else
 
 print(true and false);
 print(null or "yes");
+
+print("1" + 1);

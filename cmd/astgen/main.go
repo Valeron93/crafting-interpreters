@@ -30,7 +30,7 @@ func generateStruct(w io.Writer, t typ, basetype string) {
 
 func generateStructMethods(w io.Writer, t typ, basetype string) {
 	firstSymbol := unicode.ToLower(rune(t.typename[0]))
-	fmt.Fprintf(w, "func (%c *%v) Accept(visitor %vVisitor) any {\n", firstSymbol, t.typename, basetype)
+	fmt.Fprintf(w, "func (%c *%v) Accept(visitor %vVisitor) (any, error) {\n", firstSymbol, t.typename, basetype)
 	fmt.Fprintf(w, "\treturn visitor.Visit%v(%c)\n", t.typename, firstSymbol)
 	fmt.Fprintf(w, "}\n\n")
 }
@@ -40,12 +40,12 @@ func generateVisitor(w io.Writer, types []typ, basetype string) {
 	fmt.Fprintf(w, "type %vVisitor interface {\n", basetype)
 
 	for _, t := range types {
-		fmt.Fprintf(w, "\tVisit%v(*%v) any\n", t.typename, t.typename)
+		fmt.Fprintf(w, "\tVisit%v(*%v) (any, error)\n", t.typename, t.typename)
 	}
 	fmt.Fprintf(w, "}\n\n")
 
 	fmt.Fprintf(w, "type %v interface {\n", basetype)
-	fmt.Fprintf(w, "\tAccept(%vVisitor) any\n", basetype)
+	fmt.Fprintf(w, "\tAccept(%vVisitor) (any, error)\n", basetype)
 	fmt.Fprintf(w, "}\n\n")
 
 }
