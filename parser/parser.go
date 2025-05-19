@@ -359,6 +359,10 @@ func (p *Parser) statement() (ast.Stmt, error) {
 		return p.whileStatement()
 	}
 
+	if p.match(scanner.Return) {
+		return p.returnStatement()
+	}
+
 	if p.match(scanner.For) {
 		return p.forStatement()
 	}
@@ -374,6 +378,28 @@ func (p *Parser) statement() (ast.Stmt, error) {
 	}
 
 	return p.expressionStatement()
+}
+
+func (p *Parser) returnStatement() (ast.Stmt, error) {
+	token := p.prev()
+	var value ast.Expr
+
+	if !p.check(scanner.Semicolon) {
+		var err error
+		value, err = p.expression()
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	_, err := p.consume(scanner.Semicolon, "expected ';' after return statement")
+	if err != nil {
+		return nil, err
+	}
+	return &ast.ReturnStmt{
+		Token: token,
+		Value: value,
+	}, nil
 }
 
 func (p *Parser) forStatement() (ast.Stmt, error) {

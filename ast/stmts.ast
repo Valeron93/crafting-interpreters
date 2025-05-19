@@ -9,3 +9,4 @@ IfStmt       : Condition Expr, Then Stmt, Else Stmt
 BlockStmt    : Statements []Stmt
 WhileStmt    : Condition Expr, Body Stmt
 FuncDeclStmt : Name scanner.Token, Params []scanner.Token, Body []Stmt
+ReturnStmt   : scanner.Token, Value Expr

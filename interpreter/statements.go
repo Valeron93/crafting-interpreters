@@ -78,3 +78,17 @@ func (i *Interpreter) VisitFuncDeclStmt(stmt *ast.FuncDeclStmt) (any, error) {
 
 	return nil, nil
 }
+
+func (i *Interpreter) VisitReturnStmt(stmt *ast.ReturnStmt) (any, error) {
+	var value any
+	var err error
+	if stmt.Value != nil {
+		value, err = i.Eval(stmt.Value)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return nil, &FunctionReturn{
+		Value: value,
+	}
+}

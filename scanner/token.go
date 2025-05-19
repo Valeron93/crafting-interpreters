@@ -50,21 +50,21 @@ const (
 )
 
 var keywords = map[string]TokenType{
-	"and":   And,
-	"class": Class,
-	"else":  Else,
-	"false": False,
-	"for":   For,
-	"fn":    Func,
-	"if":    If,
-	"null":  Nil,
-	"or":    Or,
-	"ret":   Return,
-	"super": Super,
-	"this":  This,
-	"true":  True,
-	"let":   Var,
-	"while": While,
+	"and":    And,
+	"class":  Class,
+	"else":   Else,
+	"false":  False,
+	"for":    For,
+	"fn":     Func,
+	"if":     If,
+	"null":   Nil,
+	"or":     Or,
+	"return": Return,
+	"super":  Super,
+	"this":   This,
+	"true":   True,
+	"let":    Var,
+	"while":  While,
 }
 
 type Token struct {

@@ -10,6 +10,10 @@ type Interpreter struct {
 	globals *Environment
 }
 
+type FunctionReturn struct {
+	Value any
+}
+
 func New() Interpreter {
 	env := NewEnvironment()
 	i := Interpreter{
@@ -20,6 +24,10 @@ func New() Interpreter {
 	i.env.Define("print", &PrintFunction{})
 
 	return i
+}
+
+func (f *FunctionReturn) Error() string {
+	return "FunctionReturn"
 }
 
 func floatOperator(operator scanner.Token, lhs float64, rhs float64) float64 {

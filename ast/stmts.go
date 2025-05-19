@@ -11,6 +11,7 @@ type StmtVisitor interface {
 	VisitBlockStmt(*BlockStmt) (any, error)
 	VisitWhileStmt(*WhileStmt) (any, error)
 	VisitFuncDeclStmt(*FuncDeclStmt) (any, error)
+	VisitReturnStmt(*ReturnStmt) (any, error)
 }
 
 type Stmt interface {
@@ -69,5 +70,14 @@ type FuncDeclStmt struct {
 
 func (f *FuncDeclStmt) Accept(visitor StmtVisitor) (any, error) {
 	return visitor.VisitFuncDeclStmt(f)
+}
+
+type ReturnStmt struct {
+	scanner.Token
+	Value Expr
+}
+
+func (r *ReturnStmt) Accept(visitor StmtVisitor) (any, error) {
+	return visitor.VisitReturnStmt(r)
 }
 

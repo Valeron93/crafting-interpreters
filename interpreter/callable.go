@@ -21,7 +21,16 @@ func (c *CallableObject) Call(i *Interpreter, args []any) (any, error) {
 	for i, arg := range args {
 		env.Define(c.Declaration.Params[i].Lexeme, arg)
 	}
-	i.executeBlock(c.Declaration.Body, env)
+	err := i.executeBlock(c.Declaration.Body, env)
+
+	if err != nil {
+		if functionReturn, ok := err.(*FunctionReturn); ok {
+			return functionReturn.Value, nil
+		} else {
+			return nil, err
+		}
+	}
+
 	return nil, nil
 }
 

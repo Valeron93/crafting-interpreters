@@ -1,0 +1,15 @@
+fn foo() {
+    return 1;
+}
+
+fn bar() {
+    return null;
+}
+
+fn add(a, b) {
+    return a + b;
+}
+
+print("foo returned: ", foo());
+print("bar returned: ", bar());
+print("add(1, 3) returned: ", add(1, 3));
