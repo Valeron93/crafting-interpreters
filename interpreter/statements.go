@@ -65,3 +65,16 @@ func (i *Interpreter) VisitWhileStmt(stmt *ast.WhileStmt) (any, error) {
 	return nil, nil
 
 }
+
+func (i *Interpreter) VisitFuncDeclStmt(stmt *ast.FuncDeclStmt) (any, error) {
+	f := &CallableObject{
+		Declaration: stmt,
+	}
+
+	err := i.env.Define(stmt.Name.Lexeme, f)
+	if err != nil {
+		return nil, err
+	}
+
+	return nil, nil
+}

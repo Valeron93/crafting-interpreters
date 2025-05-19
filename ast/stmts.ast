@@ -3,8 +3,9 @@
 #import "github.com/Valeron93/crafting-interpreters/scanner"
 #
 
-ExprStmt  : Expr
-VarStmt   : Name scanner.Token, Init Expr
-IfStmt    : Condition Expr, Then Stmt, Else Stmt
-BlockStmt : Statements []Stmt
-WhileStmt : Condition Expr, Body Stmt
+ExprStmt     : Expr
+VarStmt      : Name scanner.Token, Init Expr
+IfStmt       : Condition Expr, Then Stmt, Else Stmt
+BlockStmt    : Statements []Stmt
+WhileStmt    : Condition Expr, Body Stmt
+FuncDeclStmt : Name scanner.Token, Params []scanner.Token, Body []Stmt

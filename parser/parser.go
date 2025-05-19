@@ -532,10 +532,62 @@ func (p *Parser) ifStatement() (ast.Stmt, error) {
 
 func (p *Parser) declaration() (ast.Stmt, error) {
 
+	if p.match(scanner.Func) {
+		return p.function("function")
+	}
 	if p.match(scanner.Var) {
 		return p.varDeclaration()
 	}
 	return p.statement()
+}
+
+func (p *Parser) function(kind string) (ast.Stmt, error) {
+	name, err := p.consume(scanner.Ident, "expected "+kind+" name")
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = p.consume(scanner.LeftParen, "expected '(' after "+kind+" name")
+	params := make([]scanner.Token, 0)
+
+	if !p.check(scanner.RightParen) {
+
+		param, err := p.consume(scanner.Ident, "expected parameter name")
+		if err != nil {
+			return nil, err
+		}
+		params = append(params, param)
+
+		for p.match(scanner.Comma) {
+			param, err = p.consume(scanner.Ident, "expected parameter name")
+			if err != nil {
+				return nil, err
+			}
+			params = append(params, param)
+		}
+	}
+
+	_, err = p.consume(scanner.RightParen, "expected ')' after parameter list")
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = p.consume(scanner.LeftBrace, "expected '{' before "+kind+" body")
+	if err != nil {
+		return nil, err
+	}
+
+	body, err := p.block()
+	if err != nil {
+		return nil, err
+	}
+
+	return &ast.FuncDeclStmt{
+		Name:   name,
+		Params: params,
+		Body:   body,
+	}, nil
+
 }
 
 func (p *Parser) varDeclaration() (ast.Stmt, error) {

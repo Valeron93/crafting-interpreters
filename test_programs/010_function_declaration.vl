@@ -1,0 +1,17 @@
+fn foo() {
+    print("foo called");
+}
+
+fn bar(arg1) {
+    print("bar called: ", arg1);
+}
+
+fn baz(arg1, arg2) {
+    print("baz calling arg1:");
+    arg1(arg2);
+}
+
+foo();
+bar(1);
+bar("hello");
+print(foo, " ", bar, " ", baz);
