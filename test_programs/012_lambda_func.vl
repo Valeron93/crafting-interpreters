@@ -4,3 +4,10 @@ fn () { return 1; };
 let f = fn () { return 1; };
 
 print(f());
+
+fn apply(func, arg) {
+    return func(arg);
+}
+
+let result = apply(fn (arg) { return arg + " applied"; }, "arg");
+print(result);
