@@ -309,6 +309,10 @@ func (p *Parser) statement() (ast.Stmt, error) {
 		return p.whileStatement()
 	}
 
+	if p.match(scanner.For) {
+		return p.forStatement()
+	}
+
 	if p.match(scanner.LeftBrace) {
 		stmts, err := p.block()
 		if err != nil {
@@ -320,6 +324,80 @@ func (p *Parser) statement() (ast.Stmt, error) {
 	}
 
 	return p.expressionStatement()
+}
+
+func (p *Parser) forStatement() (ast.Stmt, error) {
+	_, err := p.consume(scanner.LeftParen, "expected '(' after for")
+	if err != nil {
+		return nil, err
+	}
+
+	var init ast.Stmt
+
+	if p.match(scanner.Semicolon) {
+		init = nil
+	} else if p.match(scanner.Var) {
+		init, err = p.varDeclaration()
+	} else {
+		init, err = p.expressionStatement()
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	var cond ast.Expr
+	if !p.check(scanner.Semicolon) {
+		cond, err = p.expression()
+		if err != nil {
+			return nil, err
+		}
+	}
+	_, err = p.consume(scanner.Semicolon, "expected ';' after loop condition")
+	if err != nil {
+		return nil, err
+	}
+
+	var incr ast.Expr
+	if !p.check(scanner.RightParen) {
+		incr, err = p.expression()
+		if err != nil {
+			return nil, err
+		}
+	}
+	_, err = p.consume(scanner.RightParen, "expected ')' after for")
+	if err != nil {
+		return nil, err
+	}
+
+	body, err := p.statement()
+	if err != nil {
+		return nil, err
+	}
+
+	if incr != nil {
+		body = &ast.BlockStmt{
+			Statements: []ast.Stmt{body, &ast.ExprStmt{Expr: incr}},
+		}
+	}
+
+	if cond == nil {
+		cond = &ast.LiteralExpr{Value: true}
+	}
+	body = &ast.WhileStmt{
+		Condition: cond,
+		Body:      body,
+	}
+
+	if init != nil {
+		body = &ast.BlockStmt{
+			Statements: []ast.Stmt{
+				init, body,
+			},
+		}
+	}
+
+	return body, nil
 }
 
 func (p *Parser) whileStatement() (ast.Stmt, error) {
