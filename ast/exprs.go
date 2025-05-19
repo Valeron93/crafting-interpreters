@@ -13,6 +13,7 @@ type ExprVisitor interface {
 	VisitVarExpr(*VarExpr) (any, error)
 	VisitAssignExpr(*AssignExpr) (any, error)
 	VisitCallExpr(*CallExpr) (any, error)
+	VisitLambdaExpr(*LambdaExpr) (any, error)
 }
 
 type Expr interface {
@@ -89,5 +90,14 @@ type CallExpr struct {
 
 func (c *CallExpr) Accept(visitor ExprVisitor) (any, error) {
 	return visitor.VisitCallExpr(c)
+}
+
+type LambdaExpr struct {
+	Params []scanner.Token
+	Body []Stmt
+}
+
+func (l *LambdaExpr) Accept(visitor ExprVisitor) (any, error) {
+	return visitor.VisitLambdaExpr(l)
 }
 

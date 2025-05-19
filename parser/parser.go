@@ -39,6 +39,15 @@ func (p *Parser) check(typ scanner.TokenType) bool {
 	return p.peek().Type == typ
 }
 
+func (p *Parser) checkNext(typ scanner.TokenType) bool {
+
+	if p.current+1 >= len(p.tokens) {
+		return false
+	}
+
+	return p.tokens[p.current+1].Type == typ
+}
+
 func (p *Parser) advance() scanner.Token {
 	if !p.isAtEnd() {
 		p.current++
@@ -104,6 +113,28 @@ func (p *Parser) assignment() (ast.Expr, error) {
 		return nil, p.reportError(equals, "invalid assignment")
 	}
 	return expr, nil
+}
+
+func (p *Parser) lambdaFunction() (ast.Expr, error) {
+	params, err := p.params()
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = p.consume(scanner.LeftBrace, "expected '{' before lambda body")
+	if err != nil {
+		return nil, err
+	}
+
+	body, err := p.block()
+	if err != nil {
+		return nil, err
+	}
+
+	return &ast.LambdaExpr{
+		Params: params,
+		Body:   body,
+	}, nil
 }
 
 func (p *Parser) or() (ast.Expr, error) {
@@ -347,6 +378,10 @@ func (p *Parser) primary() (ast.Expr, error) {
 		}, nil
 	}
 
+	if p.match(scanner.Func) {
+		return p.lambdaFunction()
+	}
+
 	return nil, p.reportError(p.peek(), "expected expression")
 }
 
@@ -557,8 +592,8 @@ func (p *Parser) ifStatement() (ast.Stmt, error) {
 }
 
 func (p *Parser) declaration() (ast.Stmt, error) {
-
-	if p.match(scanner.Func) {
+	if p.check(scanner.Func) && p.checkNext(scanner.Ident) {
+		p.match(scanner.Func)
 		return p.function("function")
 	}
 	if p.match(scanner.Var) {
@@ -567,15 +602,14 @@ func (p *Parser) declaration() (ast.Stmt, error) {
 	return p.statement()
 }
 
-func (p *Parser) function(kind string) (ast.Stmt, error) {
-	name, err := p.consume(scanner.Ident, "expected "+kind+" name")
+func (p *Parser) params() ([]scanner.Token, error) {
+
+	_, err := p.consume(scanner.LeftParen, "expected '(' before parameter list")
 	if err != nil {
 		return nil, err
 	}
 
-	_, err = p.consume(scanner.LeftParen, "expected '(' after "+kind+" name")
 	params := make([]scanner.Token, 0)
-
 	if !p.check(scanner.RightParen) {
 
 		param, err := p.consume(scanner.Ident, "expected parameter name")
@@ -594,6 +628,16 @@ func (p *Parser) function(kind string) (ast.Stmt, error) {
 	}
 
 	_, err = p.consume(scanner.RightParen, "expected ')' after parameter list")
+	return params, err
+}
+
+func (p *Parser) function(kind string) (ast.Stmt, error) {
+	name, err := p.consume(scanner.Ident, "expected "+kind+" name")
+	if err != nil {
+		return nil, err
+	}
+
+	params, err := p.params()
 	if err != nil {
 		return nil, err
 	}

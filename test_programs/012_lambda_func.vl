@@ -1,0 +1,6 @@
+// check if lambda function can be a expression statement
+
+fn () { return 1; };
+let f = fn () { return 1; };
+
+print(f());

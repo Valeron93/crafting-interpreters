@@ -137,3 +137,16 @@ func (i *Interpreter) VisitCallExpr(expr *ast.CallExpr) (any, error) {
 
 	return f.Call(i, args)
 }
+
+func (i *Interpreter) VisitLambdaExpr(expr *ast.LambdaExpr) (any, error) {
+	return &CallableObject{
+		Declaration: &ast.FuncDeclStmt{
+			Name: scanner.Token{
+				Type:   scanner.Ident,
+				Lexeme: "lambda",
+			},
+			Params: expr.Params,
+			Body:   expr.Body,
+		},
+	}, nil
+}
