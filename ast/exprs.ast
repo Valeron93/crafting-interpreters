@@ -11,3 +11,4 @@ LiteralExpr    : Value any
 UnaryExpr      : Operator scanner.Token, Right Expr
 VarExpr        : Name scanner.Token
 AssignExpr     : Name scanner.Token, Value Expr
+CallExpr       : Callee Expr, Paren scanner.Token, Args []Expr

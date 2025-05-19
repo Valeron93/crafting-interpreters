@@ -6,7 +6,19 @@ import (
 )
 
 type Interpreter struct {
-	env *Environment
+	env     *Environment
+	globals *Environment
+}
+
+func New() Interpreter {
+	env := NewEnvironment()
+	i := Interpreter{
+		env:     env,
+		globals: env,
+	}
+	i.env.Define("clock", &Clock{})
+
+	return i
 }
 
 func floatOperator(operator scanner.Token, lhs float64, rhs float64) float64 {

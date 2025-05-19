@@ -35,13 +35,13 @@ func (e *Environment) Get(name scanner.Token) (any, error) {
 	return nil, fmt.Errorf("unknown identifier: '%v'", name.Lexeme)
 }
 
-func (e *Environment) Define(name scanner.Token, value any) error {
+func (e *Environment) Define(name string, value any) error {
 
-	if _, ok := e.variables[name.Lexeme]; ok {
-		return fmt.Errorf("'%v' is already defined", name.Lexeme)
+	if _, ok := e.variables[name]; ok {
+		return fmt.Errorf("'%v' is already defined", name)
 	}
 
-	e.variables[name.Lexeme] = value
+	e.variables[name] = value
 	return nil
 }
 

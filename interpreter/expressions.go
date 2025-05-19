@@ -29,12 +29,6 @@ func (i *Interpreter) VisitAssignExpr(expr *ast.AssignExpr) (any, error) {
 	return value, nil
 }
 
-func New() Interpreter {
-	return Interpreter{
-		env: NewEnvironment(),
-	}
-}
-
 func (i *Interpreter) VisitBinaryExpr(expr *ast.BinaryExpr) (any, error) {
 	left, err := i.Eval(expr.Left)
 	if err != nil {
@@ -113,4 +107,33 @@ func (i *Interpreter) VisitLogicalExpr(expr *ast.LogicalExpr) (any, error) {
 		}
 	}
 	return i.Eval(expr.Right)
+}
+
+func (i *Interpreter) VisitCallExpr(expr *ast.CallExpr) (any, error) {
+
+	callee, err := i.Eval(expr.Callee)
+	if err != nil {
+		return nil, err
+	}
+
+	args := make([]any, 0)
+
+	for _, arg := range expr.Args {
+		value, err := i.Eval(arg)
+		if err != nil {
+			return nil, err
+		}
+		args = append(args, value)
+	}
+
+	f, ok := callee.(Callable)
+	if !ok {
+		return nil, fmt.Errorf("`%#v` is not callable", callee)
+	}
+
+	if len(args) != f.Arity() {
+		return nil, fmt.Errorf("function expects %v arguments, got: %v", f.Arity(), len(args))
+	}
+
+	return f.Call(i, args)
 }

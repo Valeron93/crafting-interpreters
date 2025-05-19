@@ -244,8 +244,62 @@ func (p *Parser) unary() (ast.Expr, error) {
 			Right:    right,
 		}, err
 	}
+	return p.call()
+}
 
-	return p.primary()
+func (p *Parser) call() (ast.Expr, error) {
+
+	expr, err := p.primary()
+	if err != nil {
+		return nil, err
+	}
+
+	for {
+		if p.match(scanner.LeftParen) {
+			expr, err = p.finishCall(expr)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			break
+		}
+	}
+
+	return expr, nil
+}
+
+func (p *Parser) finishCall(callee ast.Expr) (ast.Expr, error) {
+	args := make([]ast.Expr, 0, 1)
+	if !p.check(scanner.RightParen) {
+
+		expr, err := p.expression()
+		if err != nil {
+			return nil, err
+		}
+		args = append(args, expr)
+
+		for p.match(scanner.Comma) {
+			if len(args) >= 127 {
+				return nil, p.reportError(p.peek(), "function call has a limit of 127 arguments")
+			}
+
+			expr, err := p.expression()
+			if err != nil {
+				return nil, err
+			}
+			args = append(args, expr)
+		}
+	}
+
+	paren, err := p.consume(scanner.RightParen, "")
+	if err != nil {
+		return nil, err
+	}
+	return &ast.CallExpr{
+		Callee: callee,
+		Paren:  paren,
+		Args:   args,
+	}, nil
 }
 
 func (p *Parser) primary() (ast.Expr, error) {

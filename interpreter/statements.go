@@ -15,7 +15,7 @@ func (i *Interpreter) VisitVarStmt(stmt *ast.VarStmt) (any, error) {
 			return nil, err
 		}
 	}
-	i.env.Define(stmt.Name, value)
+	i.env.Define(stmt.Name.Lexeme, value)
 	return nil, nil
 }
 
