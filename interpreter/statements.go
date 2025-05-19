@@ -1,8 +1,6 @@
 package interpreter
 
 import (
-	"fmt"
-
 	"github.com/Valeron93/crafting-interpreters/ast"
 )
 
@@ -22,15 +20,6 @@ func (i *Interpreter) VisitVarStmt(stmt *ast.VarStmt) (any, error) {
 func (i *Interpreter) VisitExprStmt(stmt *ast.ExprStmt) (any, error) {
 	_, err := i.Eval(stmt.Expr)
 	return nil, err
-}
-
-func (i *Interpreter) VisitPrintStmt(stmt *ast.PrintStmt) (any, error) {
-	value, err := i.Eval(stmt.Expr)
-	if err != nil {
-		return nil, err
-	}
-	fmt.Printf("%v\n", value)
-	return nil, nil
 }
 
 func (i *Interpreter) VisitIfStmt(stmt *ast.IfStmt) (any, error) {

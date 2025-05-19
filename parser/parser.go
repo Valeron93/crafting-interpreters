@@ -355,10 +355,6 @@ func (p *Parser) statement() (ast.Stmt, error) {
 		return p.ifStatement()
 	}
 
-	if p.match(scanner.Print) {
-		return p.printStatement()
-	}
-
 	if p.match(scanner.While) {
 		return p.whileStatement()
 	}
@@ -581,32 +577,6 @@ func (p *Parser) expressionStatement() (ast.Stmt, error) {
 	}, nil
 }
 
-func (p *Parser) printStatement() (ast.Stmt, error) {
-
-	_, err := p.consume(scanner.LeftParen, "expected '(' after print")
-	if err != nil {
-		return nil, err
-	}
-
-	value, err := p.expression()
-	if err != nil {
-		return nil, err
-	}
-	_, err = p.consume(scanner.RightParen, "expected ')' after expression")
-	if err != nil {
-		return nil, err
-	}
-
-	_, err = p.consume(scanner.Semicolon, "expected ';' after statement")
-	if err != nil {
-		return nil, err
-	}
-
-	return &ast.PrintStmt{
-		Expr: value,
-	}, nil
-}
-
 func (p *Parser) sync() {
 	p.advance()
 
@@ -617,7 +587,7 @@ func (p *Parser) sync() {
 
 		switch p.peek().Type {
 		case scanner.Class, scanner.Func, scanner.Var, scanner.For,
-			scanner.If, scanner.While, scanner.Print, scanner.Return:
+			scanner.If, scanner.While, scanner.Return:
 			return
 		}
 

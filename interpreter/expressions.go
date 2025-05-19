@@ -130,9 +130,9 @@ func (i *Interpreter) VisitCallExpr(expr *ast.CallExpr) (any, error) {
 	if !ok {
 		return nil, fmt.Errorf("`%#v` is not callable", callee)
 	}
-
-	if len(args) != f.Arity() {
-		return nil, fmt.Errorf("function expects %v arguments, got: %v", f.Arity(), len(args))
+	arity, varArg := f.Arity()
+	if !varArg && len(args) != arity {
+		return nil, fmt.Errorf("function expects %v arguments, got: %v", arity, len(args))
 	}
 
 	return f.Call(i, args)

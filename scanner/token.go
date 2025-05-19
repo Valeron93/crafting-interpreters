@@ -40,7 +40,6 @@ const (
 	If
 	Nil
 	Or
-	Print
 	Return
 	Super
 	This
@@ -60,7 +59,6 @@ var keywords = map[string]TokenType{
 	"if":    If,
 	"null":  Nil,
 	"or":    Or,
-	"print": Print,
 	"ret":   Return,
 	"super": Super,
 	"this":  This,

@@ -39,19 +39,18 @@ func _() {
 	_ = x[If-28]
 	_ = x[Nil-29]
 	_ = x[Or-30]
-	_ = x[Print-31]
-	_ = x[Return-32]
-	_ = x[Super-33]
-	_ = x[This-34]
-	_ = x[True-35]
-	_ = x[Var-36]
-	_ = x[While-37]
-	_ = x[EOF-38]
+	_ = x[Return-31]
+	_ = x[Super-32]
+	_ = x[This-33]
+	_ = x[True-34]
+	_ = x[Var-35]
+	_ = x[While-36]
+	_ = x[EOF-37]
 }
 
-const _TokenType_name = "LeftParenRightParenLeftBraceRightBraceCommaDotMinusPlusSemicolonSlashStarBangBangEqualEqualEqualEqualGreaterGreaterEqualLessLessEqualIdentStringNumberAndClassElseFalseFuncForIfNilOrPrintReturnSuperThisTrueVarWhileEOF"
+const _TokenType_name = "LeftParenRightParenLeftBraceRightBraceCommaDotMinusPlusSemicolonSlashStarBangBangEqualEqualEqualEqualGreaterGreaterEqualLessLessEqualIdentStringNumberAndClassElseFalseFuncForIfNilOrReturnSuperThisTrueVarWhileEOF"
 
-var _TokenType_index = [...]uint8{0, 9, 19, 28, 38, 43, 46, 51, 55, 64, 69, 73, 77, 86, 91, 101, 108, 120, 124, 133, 138, 144, 150, 153, 158, 162, 167, 171, 174, 176, 179, 181, 186, 192, 197, 201, 205, 208, 213, 216}
+var _TokenType_index = [...]uint8{0, 9, 19, 28, 38, 43, 46, 51, 55, 64, 69, 73, 77, 86, 91, 101, 108, 120, 124, 133, 138, 144, 150, 153, 158, 162, 167, 171, 174, 176, 179, 181, 187, 192, 196, 200, 203, 208, 211}
 
 func (i TokenType) String() string {
 	if i < 0 || i >= TokenType(len(_TokenType_index)-1) {

@@ -16,7 +16,8 @@ func New() Interpreter {
 		env:     env,
 		globals: env,
 	}
-	i.env.Define("clock", &Clock{})
+	i.env.Define("clock", &ClockFunction{})
+	i.env.Define("print", &PrintFunction{})
 
 	return i
 }

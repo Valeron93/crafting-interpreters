@@ -6,7 +6,6 @@ import "github.com/Valeron93/crafting-interpreters/scanner"
 
 type StmtVisitor interface {
 	VisitExprStmt(*ExprStmt) (any, error)
-	VisitPrintStmt(*PrintStmt) (any, error)
 	VisitVarStmt(*VarStmt) (any, error)
 	VisitIfStmt(*IfStmt) (any, error)
 	VisitBlockStmt(*BlockStmt) (any, error)
@@ -23,14 +22,6 @@ type ExprStmt struct {
 
 func (e *ExprStmt) Accept(visitor StmtVisitor) (any, error) {
 	return visitor.VisitExprStmt(e)
-}
-
-type PrintStmt struct {
-	Expr
-}
-
-func (p *PrintStmt) Accept(visitor StmtVisitor) (any, error) {
-	return visitor.VisitPrintStmt(p)
 }
 
 type VarStmt struct {
