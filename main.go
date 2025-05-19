@@ -1,13 +1,13 @@
 package main
 
 import (
-	"bufio"
 	"errors"
 	"fmt"
 	"os"
 
 	"github.com/Valeron93/crafting-interpreters/parser"
 	"github.com/Valeron93/crafting-interpreters/scanner"
+	"github.com/chzyer/readline"
 )
 
 func main() {
@@ -66,14 +66,17 @@ func runFile(path string) {
 var replInterpreter = NewInterpreter()
 
 func runPrompt() {
-	scanner := bufio.NewScanner(os.Stdin)
+
+	rl, err := readline.New("> ")
+	if err != nil {
+		panic(err)
+	}
 
 	for {
-		fmt.Print("> ")
-		if !scanner.Scan() {
+		line, err := rl.Readline()
+		if err != nil {
 			break
 		}
-		line := scanner.Text()
 		if err := runString(&replInterpreter, line); err != nil {
 			fmt.Fprintf(os.Stderr, "runtime error: %v\n", err)
 		}
