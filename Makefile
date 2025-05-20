@@ -10,3 +10,5 @@ build:
 
 clean:
 	rm -rf build/
+
+.PHONY: build
