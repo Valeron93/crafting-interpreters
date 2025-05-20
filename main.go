@@ -1,12 +1,12 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"os"
 
 	"github.com/Valeron93/crafting-interpreters/interpreter"
 	"github.com/Valeron93/crafting-interpreters/parser"
+	"github.com/Valeron93/crafting-interpreters/resolver"
 	"github.com/Valeron93/crafting-interpreters/scanner"
 	"github.com/chzyer/readline"
 )
@@ -22,7 +22,7 @@ func main() {
 	}
 }
 
-func runString(i *interpreter.Interpreter, code string) error {
+func runString(i *interpreter.Interpreter, r *resolver.Resolver, code string) bool {
 	scanner := scanner.NewScanner(code)
 
 	tokens, errs := scanner.ScanTokens()
@@ -31,24 +31,33 @@ func runString(i *interpreter.Interpreter, code string) error {
 		for _, err := range errs {
 			fmt.Fprintf(os.Stderr, "%v\n", err)
 		}
-		return errors.New("failed to scan")
+		return false
 	}
 
 	p := parser.NewParser(tokens)
-	expression, errs := p.Parse()
+	expression, reporter := p.Parse()
 	if len(errs) > 0 {
 		for _, err := range errs {
 			fmt.Fprintf(os.Stderr, "%v\n", err)
 		}
-		return errors.New("failed to parse")
+		return false
 	}
 
-	if expression != nil {
-		if err := i.Interpret(expression); err != nil {
-			return err
+
+	r.ResolveStatements(expression)
+	reporter = r.ErrorReporter()
+	if reporter.HasErrors() {
+		for _, err := range reporter.Errors() {
+			fmt.Fprintf(os.Stderr, "%v\n", err)
 		}
+		return false
 	}
-	return nil
+
+	if err := i.Interpret(expression); err != nil {
+		fmt.Fprintf(os.Stderr, "runtime error: %v\n", err)
+		return false
+	}
+	return true
 }
 
 func runFile(path string) {
@@ -58,13 +67,14 @@ func runFile(path string) {
 		os.Exit(1)
 	}
 	interpreter := interpreter.New()
-	if err := runString(&interpreter, string(bytes)); err != nil {
-		fmt.Fprintf(os.Stderr, "runtime error: %v\n", err)
+	resolver := resolver.New(&interpreter)
+	if ok := runString(&interpreter, resolver, string(bytes)); !ok {
 		os.Exit(1)
 	}
 }
 
 var replInterpreter = interpreter.New()
+var replResolver = resolver.New(&replInterpreter)
 
 func runPrompt() {
 
@@ -78,8 +88,7 @@ func runPrompt() {
 		if err != nil {
 			break
 		}
-		if err := runString(&replInterpreter, line); err != nil {
-			fmt.Fprintf(os.Stderr, "runtime error: %v\n", err)
-		}
+		runString(&replInterpreter, replResolver, line)
+		replResolver.ErrorReporter().Clear()
 	}
 }

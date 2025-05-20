@@ -67,15 +67,11 @@ func (p *Parser) prev() scanner.Token {
 	return p.tokens[p.current-1]
 }
 
-// TODO: fix
 func (p *Parser) consume(typ scanner.TokenType, msg string) (scanner.Token, error) {
 	if p.check(typ) {
 		return p.advance(), nil
-	}
-	if msg == "" {
-		return scanner.Token{}, p.errorReporter.Report(p.peek(), "expected %v, got: %v", typ, p.peek().Lexeme)
 	} else {
-		return scanner.Token{}, p.errorReporter.Report(p.peek(), msg)
+		return scanner.Token{}, p.errorReporter.Report(p.peek(), "%v", msg)
 	}
 }
 
@@ -293,7 +289,7 @@ func (p *Parser) finishCall(callee ast.Expr) (ast.Expr, error) {
 		}
 	}
 
-	paren, err := p.consume(scanner.RightParen, "")
+	paren, err := p.consume(scanner.RightParen, "expected ')' after function call argument list")
 	if err != nil {
 		return nil, err
 	}
@@ -731,7 +727,7 @@ func (p *Parser) sync() {
 		p.advance()
 	}
 }
-func (p *Parser) Parse() ([]ast.Stmt, []error) {
+func (p *Parser) Parse() ([]ast.Stmt, *util.TokenErrorReporter) {
 
 	stmts := make([]ast.Stmt, 0, 100)
 
@@ -745,5 +741,5 @@ func (p *Parser) Parse() ([]ast.Stmt, []error) {
 		}
 	}
 
-	return stmts, p.errorReporter.Errors()
+	return stmts, &p.errorReporter
 }

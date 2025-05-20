@@ -9,12 +9,7 @@ import (
 )
 
 func (i *Interpreter) VisitVarExpr(expr *ast.VarExpr) (any, error) {
-
-	value, err := i.env.Get(expr.Name)
-	if err != nil {
-		return nil, err
-	}
-	return value, nil
+	return i.lookUpVar(expr.Name, expr)
 }
 
 func (i *Interpreter) VisitAssignExpr(expr *ast.AssignExpr) (any, error) {
@@ -22,6 +17,20 @@ func (i *Interpreter) VisitAssignExpr(expr *ast.AssignExpr) (any, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	distance, ok := i.locals[expr]
+	if ok {
+		err = i.env.AssignAt(distance, expr.Name, value)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		err = i.globals.Assign(expr.Name, value)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	err = i.env.Assign(expr.Name, value)
 	if err != nil {
 		return nil, err

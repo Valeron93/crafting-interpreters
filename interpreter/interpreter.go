@@ -8,6 +8,13 @@ import (
 type Interpreter struct {
 	env     *Environment
 	globals *Environment
+	locals  map[ast.Expr]int
+}
+
+func (i *Interpreter) GlobalExists(lexeme string) bool {
+
+	_, ok := i.globals.variables[lexeme]
+	return ok
 }
 
 type FunctionReturn struct {
@@ -19,6 +26,7 @@ func New() Interpreter {
 	i := Interpreter{
 		env:     env,
 		globals: env,
+		locals:  make(map[ast.Expr]int),
 	}
 	i.env.Define("clock", &ClockFunction{})
 	i.env.Define("print", &PrintFunction{})
@@ -112,4 +120,17 @@ func (i *Interpreter) Interpret(stmts []ast.Stmt) error {
 	}
 
 	return nil
+}
+
+func (i *Interpreter) Resolve(expr ast.Expr, depth int) {
+	i.locals[expr] = depth
+}
+
+func (i *Interpreter) lookUpVar(name scanner.Token, expr ast.Expr) (any, error) {
+	distance, ok := i.locals[expr]
+	if ok {
+		return i.env.GetAt(distance, name)
+	} else {
+		return i.globals.Get(name)
+	}
 }

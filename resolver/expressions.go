@@ -1,0 +1,81 @@
+package resolver
+
+import (
+	"github.com/Valeron93/crafting-interpreters/ast"
+	"github.com/Valeron93/crafting-interpreters/scanner"
+)
+
+func (r *Resolver) VisitAssignExpr(expr *ast.AssignExpr) (any, error) {
+	r.resolveExpr(expr.Value)
+	r.resolveLocal(expr, expr.Name)
+	return nil, nil
+}
+
+func (r *Resolver) VisitBinaryExpr(expr *ast.BinaryExpr) (any, error) {
+	r.resolveExpr(expr.Left)
+	r.resolveExpr(expr.Right)
+	return nil, nil
+}
+
+func (r *Resolver) VisitCallExpr(expr *ast.CallExpr) (any, error) {
+	r.resolveExpr(expr.Callee)
+
+	for _, arg := range expr.Args {
+		r.resolveExpr(arg)
+	}
+
+	return nil, nil
+}
+
+func (r *Resolver) VisitGroupingExpr(expr *ast.GroupingExpr) (any, error) {
+	r.resolveExpr(expr.Expression)
+	return nil, nil
+}
+
+func (r *Resolver) VisitLambdaExpr(expr *ast.LambdaExpr) (any, error) {
+	r.resolveFunction(expr.Params, expr.Body)
+	return nil, nil
+}
+
+func (r *Resolver) VisitLiteralExpr(*ast.LiteralExpr) (any, error) {
+	return nil, nil
+}
+
+func (r *Resolver) VisitLogicalExpr(expr *ast.LogicalExpr) (any, error) {
+	r.resolveExpr(expr.Left)
+	r.resolveExpr(expr.Right)
+	return nil, nil
+}
+
+func (r *Resolver) VisitUnaryExpr(expr *ast.UnaryExpr) (any, error) {
+	r.resolveExpr(expr.Right)
+	return nil, nil
+}
+
+func (r *Resolver) VisitVarExpr(expr *ast.VarExpr) (any, error) {
+
+	if !r.scopes.Empty() {
+		if value, ok := r.scopes.MustPeek()[expr.Name.Lexeme]; ok && value == false {
+			r.errs.Report(expr.Name, "can't read local var in its own initializer")
+		}
+	}
+
+	r.resolveLocal(expr, expr.Name)
+	return nil, nil
+}
+
+func (r *Resolver) resolveLocal(expr ast.Expr, name scanner.Token) {
+	for i := r.scopes.Count() - 1; i >= 0; i-- {
+		scope := r.scopes.GetIdx(i)
+
+		if _, ok := scope[name.Lexeme]; ok {
+			r.interpreter.Resolve(expr, r.scopes.Count()-1-i)
+			return
+		}
+	}
+
+	if !r.interpreter.GlobalExists(name.Lexeme) {
+		r.errs.Report(name, "failed to resolve name '%v'", name.Lexeme)
+	}
+
+}
