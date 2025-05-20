@@ -1,23 +1,22 @@
 package parser
 
 import (
-	"fmt"
-
 	"github.com/Valeron93/crafting-interpreters/ast"
 	"github.com/Valeron93/crafting-interpreters/scanner"
+	"github.com/Valeron93/crafting-interpreters/util"
 )
 
 type Parser struct {
-	tokens  []scanner.Token
-	current int
-	errors  []error
+	tokens        []scanner.Token
+	current       int
+	errorReporter util.TokenErrorReporter
 }
 
 func NewParser(tokens []scanner.Token) Parser {
 	return Parser{
-		tokens:  tokens,
-		current: 0,
-		errors:  make([]error, 0),
+		tokens:        tokens,
+		current:       0,
+		errorReporter: util.NewTokenErrorReporter(),
 	}
 }
 
@@ -68,21 +67,15 @@ func (p *Parser) prev() scanner.Token {
 	return p.tokens[p.current-1]
 }
 
-func (p *Parser) reportError(token scanner.Token, msg string) error {
-	err := fmt.Errorf("line %v: %v", token.Line, msg)
-	p.errors = append(p.errors, err)
-	return err
-}
-
 // TODO: fix
 func (p *Parser) consume(typ scanner.TokenType, msg string) (scanner.Token, error) {
 	if p.check(typ) {
 		return p.advance(), nil
 	}
 	if msg == "" {
-		return scanner.Token{}, p.reportError(p.peek(), fmt.Sprintf("expected %v, got: %v", typ, p.peek().Type))
+		return scanner.Token{}, p.errorReporter.Report(p.peek(), "expected %v, got: %v", typ, p.peek().Lexeme)
 	} else {
-		return scanner.Token{}, p.reportError(p.peek(), msg)
+		return scanner.Token{}, p.errorReporter.Report(p.peek(), msg)
 	}
 }
 
@@ -110,7 +103,7 @@ func (p *Parser) assignment() (ast.Expr, error) {
 				Value: value,
 			}, nil
 		}
-		return nil, p.reportError(equals, "invalid assignment")
+		return nil, p.errorReporter.Report(equals, "invalid assignment")
 	}
 	return expr, nil
 }
@@ -289,7 +282,7 @@ func (p *Parser) finishCall(callee ast.Expr) (ast.Expr, error) {
 
 		for p.match(scanner.Comma) {
 			if len(args) >= 127 {
-				return nil, p.reportError(p.peek(), "function call has a limit of 127 arguments")
+				return nil, p.errorReporter.Report(p.peek(), "function call has a limit of 127 arguments")
 			}
 
 			expr, err := p.expression()
@@ -360,7 +353,7 @@ func (p *Parser) primary() (ast.Expr, error) {
 		return p.lambdaFunction()
 	}
 
-	return nil, p.reportError(p.peek(), "expected expression")
+	return nil, p.errorReporter.Report(p.peek(), "expected expression")
 }
 
 func (p *Parser) statement() (ast.Stmt, error) {
@@ -752,5 +745,5 @@ func (p *Parser) Parse() ([]ast.Stmt, []error) {
 		}
 	}
 
-	return stmts, p.errors
+	return stmts, p.errorReporter.Errors()
 }
