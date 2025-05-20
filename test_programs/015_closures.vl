@@ -1,0 +1,17 @@
+fn create_counter() {
+    let count = 1;
+    return fn() {
+        count = count + 1;
+        return count;
+    };
+}
+
+let counter = create_counter();
+
+print("Counter: ", counter);
+
+
+fn create_adder(add_number) => 
+    fn(add) => add_number + add;
+
+print("create_adder(10)(1): ", create_adder(10)(1));

@@ -21,7 +21,6 @@ func New(i *interpreter.Interpreter) *Resolver {
 		interpreter: i,
 		errs:        util.NewTokenErrorReporter(),
 	}
-	r.beginScope()
 	return r
 }
 

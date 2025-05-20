@@ -73,6 +73,7 @@ func (i *Interpreter) VisitWhileStmt(stmt *ast.WhileStmt) (any, error) {
 func (i *Interpreter) VisitFuncDeclStmt(stmt *ast.FuncDeclStmt) (any, error) {
 	f := &CallableObject{
 		Declaration: stmt,
+		Closure:     NewSubEnvironment(i.env),
 	}
 
 	err := i.env.Define(stmt.Name.Lexeme, f)

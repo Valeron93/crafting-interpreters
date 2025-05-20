@@ -73,9 +73,4 @@ func (r *Resolver) resolveLocal(expr ast.Expr, name scanner.Token) {
 			return
 		}
 	}
-
-	if !r.interpreter.GlobalExists(name.Lexeme) {
-		r.errs.Report(name, "failed to resolve name '%v'", name.Lexeme)
-	}
-
 }

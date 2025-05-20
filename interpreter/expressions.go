@@ -157,5 +157,6 @@ func (i *Interpreter) VisitLambdaExpr(expr *ast.LambdaExpr) (any, error) {
 			Params: expr.Params,
 			Body:   expr.Body,
 		},
+		Closure: i.env,
 	}, nil
 }

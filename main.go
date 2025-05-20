@@ -22,7 +22,7 @@ func main() {
 	}
 }
 
-func runString(i *interpreter.Interpreter, r *resolver.Resolver, code string) bool {
+func runString(i *interpreter.Interpreter, r *resolver.Resolver, code string, fileName string) bool {
 	scanner := scanner.NewScanner(code)
 
 	tokens, errs := scanner.ScanTokens()
@@ -54,7 +54,7 @@ func runString(i *interpreter.Interpreter, r *resolver.Resolver, code string) bo
 	}
 
 	if err := i.Interpret(expression); err != nil {
-		fmt.Fprintf(os.Stderr, "runtime error: %v\n", err)
+		fmt.Fprintf(os.Stderr, "%v:%v\n", fileName, err)
 		return false
 	}
 	return true
@@ -68,7 +68,7 @@ func runFile(path string) {
 	}
 	interpreter := interpreter.New()
 	resolver := resolver.New(&interpreter)
-	if ok := runString(&interpreter, resolver, string(bytes)); !ok {
+	if ok := runString(&interpreter, resolver, string(bytes), path); !ok {
 		os.Exit(1)
 	}
 }
@@ -88,7 +88,7 @@ func runPrompt() {
 		if err != nil {
 			break
 		}
-		runString(&replInterpreter, replResolver, line)
+		runString(&replInterpreter, replResolver, line, "<repl>")
 		replResolver.ErrorReporter().Clear()
 	}
 }

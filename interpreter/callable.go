@@ -13,11 +13,11 @@ type Callable interface {
 
 type CallableObject struct {
 	Declaration *ast.FuncDeclStmt
-	Env         *Environment
+	Closure     *Environment
 }
 
 func (c *CallableObject) Call(i *Interpreter, args []any) (any, error) {
-	env := NewSubEnvironment(i.globals)
+	env := NewSubEnvironment(c.Closure)
 
 	for i, arg := range args {
 		env.Define(c.Declaration.Params[i].Lexeme, arg)
@@ -40,5 +40,5 @@ func (c *CallableObject) Arity() (int, bool) {
 }
 
 func (c *CallableObject) String() string {
-	return fmt.Sprintf("<fn %v>", c.Declaration.Name.Lexeme)
+	return fmt.Sprintf("<fn %v %p>", c.Declaration.Name.Lexeme, c)
 }
