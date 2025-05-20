@@ -27,6 +27,8 @@ const (
 	Less
 	LessEqual
 
+	Arrow
+
 	Ident
 	String
 	Number

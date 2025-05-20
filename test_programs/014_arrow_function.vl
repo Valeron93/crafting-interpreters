@@ -1,0 +1,15 @@
+
+let a1 = fn() => "a1";
+
+fn a2() => "a2";
+
+fn a3(arg) => 1 + arg;
+
+fn create_function() => fn() => 1;
+
+print(a1());
+print(a2());
+print(a3(10));
+
+let func = create_function();
+print(func, " function returned: ", func());

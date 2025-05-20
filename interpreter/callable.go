@@ -13,10 +13,11 @@ type Callable interface {
 
 type CallableObject struct {
 	Declaration *ast.FuncDeclStmt
+	Env         *Environment
 }
 
 func (c *CallableObject) Call(i *Interpreter, args []any) (any, error) {
-	env := NewSubEnvironment(i.env)
+	env := NewSubEnvironment(i.globals)
 
 	for i, arg := range args {
 		env.Define(c.Declaration.Params[i].Lexeme, arg)

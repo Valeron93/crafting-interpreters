@@ -115,28 +115,6 @@ func (p *Parser) assignment() (ast.Expr, error) {
 	return expr, nil
 }
 
-func (p *Parser) lambdaFunction() (ast.Expr, error) {
-	params, err := p.params()
-	if err != nil {
-		return nil, err
-	}
-
-	_, err = p.consume(scanner.LeftBrace, "expected '{' before lambda body")
-	if err != nil {
-		return nil, err
-	}
-
-	body, err := p.block()
-	if err != nil {
-		return nil, err
-	}
-
-	return &ast.LambdaExpr{
-		Params: params,
-		Body:   body,
-	}, nil
-}
-
 func (p *Parser) or() (ast.Expr, error) {
 	expr, err := p.and()
 	if err != nil {
@@ -642,7 +620,56 @@ func (p *Parser) function(kind string) (ast.Stmt, error) {
 		return nil, err
 	}
 
-	_, err = p.consume(scanner.LeftBrace, "expected '{' before "+kind+" body")
+	body, err := p.functionBody(p.peek(), kind)
+	if err != nil {
+		return nil, err
+	}
+
+	if p.prev().Type != scanner.RightBrace {
+		_, err := p.consume(scanner.Semicolon, "expected ';' after function expression")
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return &ast.FuncDeclStmt{
+		Name:   name,
+		Params: params,
+		Body:   body,
+	}, nil
+
+}
+
+func (p *Parser) lambdaFunction() (ast.Expr, error) {
+	params, err := p.params()
+	if err != nil {
+		return nil, err
+	}
+
+	body, err := p.functionBody(p.peek(), "lambda")
+
+	return &ast.LambdaExpr{
+		Params: params,
+		Body:   body,
+	}, nil
+}
+
+func (p *Parser) functionBody(name scanner.Token, kind string) ([]ast.Stmt, error) {
+	if p.match(scanner.Arrow) {
+		returnExpr, err := p.expression()
+		if err != nil {
+			return nil, err
+		}
+
+		stmt := &ast.ReturnStmt{
+			Token: name,
+			Value: returnExpr,
+		}
+
+		return []ast.Stmt{stmt}, nil
+	}
+
+	_, err := p.consume(scanner.LeftBrace, "expected '{' before "+kind+" body")
 	if err != nil {
 		return nil, err
 	}
@@ -652,12 +679,7 @@ func (p *Parser) function(kind string) (ast.Stmt, error) {
 		return nil, err
 	}
 
-	return &ast.FuncDeclStmt{
-		Name:   name,
-		Params: params,
-		Body:   body,
-	}, nil
-
+	return body, nil
 }
 
 func (p *Parser) varDeclaration() (ast.Stmt, error) {

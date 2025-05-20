@@ -126,6 +126,8 @@ func (s *Scanner) scanToken() error {
 	case '=':
 		if s.match('=') {
 			s.addToken(EqualEqual)
+		} else if s.match('>') {
+			s.addToken(Arrow)
 		} else {
 			s.addToken(Equal)
 		}
