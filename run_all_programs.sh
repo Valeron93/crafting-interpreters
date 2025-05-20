@@ -7,6 +7,6 @@ echo +==========================================+
 for file in ./test_programs/*.vl; do
     echo RUNNING FILE: $file
 
-    go run . "$file"
+    ./build/vl "$file"
     echo +==========================================+
 done
