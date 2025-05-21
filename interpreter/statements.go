@@ -97,3 +97,12 @@ func (i *Interpreter) VisitReturnStmt(stmt *ast.ReturnStmt) (any, error) {
 		Value: value,
 	}
 }
+
+func (i *Interpreter) VisitClassDeclStmt(stmt *ast.ClassDeclStmt) (any, error) {
+	i.env.Define(stmt.Name.Lexeme, nil)
+	class := &Class{
+		Name: stmt.Name.Lexeme,
+	}
+	i.env.Assign(stmt.Name, class)
+	return nil, nil
+}

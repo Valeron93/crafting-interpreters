@@ -2,7 +2,7 @@ package scanner
 
 import "fmt"
 
-//go:generate stringer -type=TokenType
+//go:generate go run golang.org/x/tools/cmd/stringer@latest -type=TokenType
 type TokenType int32
 
 const (

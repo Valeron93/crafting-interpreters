@@ -62,3 +62,9 @@ func (r *Resolver) VisitWhileStmt(stmt *ast.WhileStmt) (any, error) {
 	r.resolveStmt(stmt.Body)
 	return nil, nil
 }
+
+func (r *Resolver) VisitClassDeclStmt(stmt *ast.ClassDeclStmt) (any, error) {
+	r.declare(stmt.Name)
+	r.define(stmt.Name)
+	return nil, nil
+}

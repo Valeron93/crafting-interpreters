@@ -561,10 +561,44 @@ func (p *Parser) declaration() (ast.Stmt, error) {
 		p.match(scanner.Func)
 		return p.function("function")
 	}
+
+	if p.match(scanner.Class) {
+		return p.classDeclaration()
+	}
+
 	if p.match(scanner.Var) {
 		return p.varDeclaration()
 	}
 	return p.statement()
+}
+
+func (p *Parser) classDeclaration() (ast.Stmt, error) {
+	name, err := p.consume(scanner.Ident, "expected class name")
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = p.consume(scanner.LeftBrace, "expected '{' before class body")
+	if err != nil {
+		return nil, err
+	}
+
+	methods := make([]*ast.FuncDeclStmt, 0)
+	for !p.check(scanner.RightBrace) {
+		if p.match(scanner.Func) {
+			fn, err := p.function("function")
+			if err != nil {
+				return nil, util.ReportErrorOnToken(p.prev(), "expected a function in class body")
+			}
+			methods = append(methods, fn)
+		}
+	}
+
+	_, err = p.consume(scanner.RightBrace, "expected '}' after class body")
+	return &ast.ClassDeclStmt{
+		Name:    name,
+		Methods: methods,
+	}, nil
 }
 
 func (p *Parser) params() ([]scanner.Token, error) {
@@ -596,7 +630,7 @@ func (p *Parser) params() ([]scanner.Token, error) {
 	return params, err
 }
 
-func (p *Parser) function(kind string) (ast.Stmt, error) {
+func (p *Parser) function(kind string) (*ast.FuncDeclStmt, error) {
 	name, err := p.consume(scanner.Ident, "expected "+kind+" name")
 	if err != nil {
 		return nil, err

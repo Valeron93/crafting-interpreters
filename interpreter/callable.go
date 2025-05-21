@@ -16,6 +16,32 @@ type CallableObject struct {
 	Closure     *Environment
 }
 
+type Class struct {
+	Name string
+}
+
+func (c *Class) String() string {
+	return fmt.Sprintf("<class %v>", c.Name)
+}
+
+type ClassInstance struct {
+	Class *Class
+}
+
+func (c *ClassInstance) String() string {
+	return fmt.Sprintf("<%v obj %p>", c.Class.Name, c)
+}
+
+func (c *Class) Call(i *Interpreter, args []any) (any, error) {
+	return &ClassInstance{
+		Class: c,
+	}, nil
+}
+
+func (c *Class) Arity() (int, bool) {
+	return 0, false
+}
+
 func (c *CallableObject) Call(i *Interpreter, args []any) (any, error) {
 	env := NewSubEnvironment(c.Closure)
 

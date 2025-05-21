@@ -12,6 +12,7 @@ type StmtVisitor interface {
 	VisitWhileStmt(*WhileStmt) (any, error)
 	VisitFuncDeclStmt(*FuncDeclStmt) (any, error)
 	VisitReturnStmt(*ReturnStmt) (any, error)
+	VisitClassDeclStmt(*ClassDeclStmt) (any, error)
 }
 
 type Stmt interface {
@@ -79,5 +80,14 @@ type ReturnStmt struct {
 
 func (r *ReturnStmt) Accept(visitor StmtVisitor) (any, error) {
 	return visitor.VisitReturnStmt(r)
+}
+
+type ClassDeclStmt struct {
+	Name scanner.Token
+	Methods []*FuncDeclStmt
+}
+
+func (c *ClassDeclStmt) Accept(visitor StmtVisitor) (any, error) {
+	return visitor.VisitClassDeclStmt(c)
 }
 
