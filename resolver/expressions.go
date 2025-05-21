@@ -74,4 +74,8 @@ func (r *Resolver) resolveLocal(expr ast.Expr, name scanner.Token) {
 			return
 		}
 	}
+
+	if !r.interpreter.GlobalExists(name.Lexeme) {
+		r.addError(util.ReportErrorOnToken(name, "undefined variable: %v", name.Lexeme))
+	}
 }
