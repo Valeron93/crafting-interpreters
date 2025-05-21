@@ -6,6 +6,7 @@ import (
 
 	"github.com/Valeron93/crafting-interpreters/ast"
 	"github.com/Valeron93/crafting-interpreters/scanner"
+	"github.com/Valeron93/crafting-interpreters/util"
 )
 
 func (i *Interpreter) VisitVarExpr(expr *ast.VarExpr) (any, error) {
@@ -159,4 +160,17 @@ func (i *Interpreter) VisitLambdaExpr(expr *ast.LambdaExpr) (any, error) {
 		},
 		Closure: i.env,
 	}, nil
+}
+
+func (i *Interpreter) VisitGetExpr(expr *ast.GetExpr) (any, error) {
+	object, err := i.Eval(expr.Object)
+	if err != nil {
+		return nil, err
+	}
+
+	if instance, ok := object.(*ClassInstance); ok {
+		return instance.Get(expr.Name)
+	}
+
+	return nil, util.ReportErrorOnToken(expr.Name, "only class instance have properties")
 }

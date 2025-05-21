@@ -4,6 +4,8 @@ import (
 	"fmt"
 
 	"github.com/Valeron93/crafting-interpreters/ast"
+	"github.com/Valeron93/crafting-interpreters/scanner"
+	"github.com/Valeron93/crafting-interpreters/util"
 )
 
 type Callable interface {
@@ -25,7 +27,16 @@ func (c *Class) String() string {
 }
 
 type ClassInstance struct {
-	Class *Class
+	Class  *Class
+	Fields map[string]any
+}
+
+func (c *ClassInstance) Get(name scanner.Token) (any, error) {
+	if field, ok := c.Fields[name.Lexeme]; ok {
+		return field, nil
+	}
+
+	return nil, util.ReportErrorOnToken(name, "undefined field '%v'", name.Lexeme)
 }
 
 func (c *ClassInstance) String() string {
@@ -34,7 +45,8 @@ func (c *ClassInstance) String() string {
 
 func (c *Class) Call(i *Interpreter, args []any) (any, error) {
 	return &ClassInstance{
-		Class: c,
+		Class:  c,
+		Fields: make(map[string]any),
 	}, nil
 }
 

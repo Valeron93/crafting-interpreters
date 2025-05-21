@@ -256,6 +256,16 @@ func (p *Parser) call() (ast.Expr, error) {
 			if err != nil {
 				return nil, err
 			}
+		} else if p.match(scanner.Dot) {
+			name, err := p.consume(scanner.Ident, "expected getter after '.'")
+			if err != nil {
+				return nil, err
+			}
+
+			expr = &ast.GetExpr{
+				Object: expr,
+				Name:   name,
+			}
 		} else {
 			break
 		}
@@ -732,14 +742,15 @@ func (p *Parser) varDeclaration() (ast.Stmt, error) {
 }
 
 func (p *Parser) expressionStatement() (ast.Stmt, error) {
-	expr, _ := p.expression()
-
-	_, err := p.consume(scanner.Semicolon, "expected ';' after expression")
+	expr, err := p.expression()
+	if err != nil {
+		return nil, err
+	}
+	_, err = p.consume(scanner.Semicolon, "expected ';' after expression")
 	if err != nil {
 		return nil, err
 	}
 
-	// this allows us to insert semicolons without expressions before
 	if expr == nil {
 		expr = &ast.LiteralExpr{Value: nil}
 	}
