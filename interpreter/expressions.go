@@ -193,3 +193,7 @@ func (i *Interpreter) VisitSetExpr(expr *ast.SetExpr) (any, error) {
 
 	return nil, util.ReportErrorOnToken(expr.Name, "only class instances have properties ")
 }
+
+func (i *Interpreter) VisitThisExpr(expr *ast.ThisExpr) (any, error) {
+	return i.lookUpVar(expr.Keyword, expr)
+}

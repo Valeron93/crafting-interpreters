@@ -49,7 +49,7 @@ func (c *ClassInstance) Get(name scanner.Token) (any, error) {
 	}
 
 	if method, ok := c.Class.FindMethod(name.Lexeme); ok {
-		return method, nil
+		return method.Bind(c), nil
 	}
 
 	return nil, util.ReportErrorOnToken(name, "undefined field '%v'", name.Lexeme)
@@ -95,4 +95,14 @@ func (c *CallableObject) Arity() (int, bool) {
 
 func (c *CallableObject) String() string {
 	return fmt.Sprintf("<fn %v %p>", c.Declaration.Name.Lexeme, c)
+}
+
+func (c *CallableObject) Bind(instance *ClassInstance) *CallableObject {
+	env := NewSubEnvironment(c.Closure)
+
+	env.Define("this", instance)
+	return &CallableObject{
+		Declaration: c.Declaration,
+		Closure:     env,
+	}
 }

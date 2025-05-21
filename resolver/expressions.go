@@ -76,6 +76,11 @@ func (r *Resolver) VisitSetExpr(expr *ast.SetExpr) (any, error) {
 	return nil, nil
 }
 
+func (r *Resolver) VisitThisExpr(expr *ast.ThisExpr) (any, error) {
+	r.resolveLocal(expr, expr.Keyword)
+	return nil, nil
+}
+
 func (r *Resolver) resolveLocal(expr ast.Expr, name scanner.Token) {
 	for i := r.scopes.Count() - 1; i >= 0; i-- {
 		scope := r.scopes.GetIdx(i)

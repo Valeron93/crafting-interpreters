@@ -67,9 +67,12 @@ func (r *Resolver) VisitClassDeclStmt(stmt *ast.ClassDeclStmt) (any, error) {
 	r.declare(stmt.Name)
 	r.define(stmt.Name)
 
+	r.beginScope()
+	r.scopes.MustPeek()["this"] = true
 	for _, method := range stmt.Methods {
 		declaration := functionMethod
 		r.resolveFunction(method.Params, method.Body, declaration)
 	}
+	r.endScope()
 	return nil, nil
 }

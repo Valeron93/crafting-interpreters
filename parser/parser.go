@@ -340,6 +340,12 @@ func (p *Parser) primary() (ast.Expr, error) {
 		}, nil
 	}
 
+	if p.match(scanner.This) {
+		return &ast.ThisExpr{
+			Keyword: p.prev(),
+		}, nil
+	}
+
 	if p.match(scanner.Ident) {
 		return &ast.VarExpr{
 			Name: p.prev(),
