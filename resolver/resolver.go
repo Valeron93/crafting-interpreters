@@ -88,6 +88,7 @@ func (r *Resolver) declare(name scanner.Token) {
 
 func (r *Resolver) define(name scanner.Token) {
 	if r.scopes.Empty() {
+		r.interpreter.DefineGlobal(name.Lexeme, nil)
 		return
 	}
 	scope := r.scopes.MustPeek()

@@ -17,6 +17,10 @@ func (i *Interpreter) GlobalExists(lexeme string) bool {
 	return ok
 }
 
+func (i *Interpreter) DefineGlobal(name string, value any) {
+	i.globals.variables[name] = value
+}
+
 type FunctionReturn struct {
 	Value any
 }
