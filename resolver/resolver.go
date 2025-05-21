@@ -29,7 +29,6 @@ func New(i *interpreter.Interpreter) *Resolver {
 		interpreter: i,
 		errs:        make([]error, 0),
 	}
-	r.beginScope()
 	return r
 }
 
@@ -72,12 +71,16 @@ func (r *Resolver) endScope() {
 }
 
 func (r *Resolver) declare(name scanner.Token) {
-	if r.scopes.Count() == 0 {
+	const msg = "'%v' was already defined in this scope"
+	if r.scopes.Empty() {
+		if r.interpreter.GlobalExists(name.Lexeme) {
+			r.addError(util.ReportErrorOnToken(name, msg, name.Lexeme))
+		}
 		return
 	}
 	scope := r.scopes.MustPeek()
 	if _, ok := scope[name.Lexeme]; ok {
-		r.addError(util.ReportErrorOnToken(name, "'%v' was already defined in this scope", name.Lexeme))
+		r.addError(util.ReportErrorOnToken(name, msg, name.Lexeme))
 		return
 	}
 	scope[name.Lexeme] = false
