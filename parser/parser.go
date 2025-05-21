@@ -71,7 +71,7 @@ func (p *Parser) consume(typ scanner.TokenType, msg string) (scanner.Token, erro
 	if p.check(typ) {
 		return p.advance(), nil
 	} else {
-		return scanner.Token{}, p.errorReporter.Report(p.peek(), "%v", msg)
+		return scanner.Token{}, p.errorReporter.Report(p.prev(), "%v", msg)
 	}
 }
 
@@ -349,7 +349,7 @@ func (p *Parser) primary() (ast.Expr, error) {
 		return p.lambdaFunction()
 	}
 
-	return nil, p.errorReporter.Report(p.peek(), "expected expression")
+	return nil, p.errorReporter.Report(p.prev(), "expected expression")
 }
 
 func (p *Parser) statement() (ast.Stmt, error) {
@@ -507,17 +507,18 @@ func (p *Parser) whileStatement() (ast.Stmt, error) {
 }
 
 func (p *Parser) block() ([]ast.Stmt, error) {
+	const msg = "expected '}' after block"
 
 	stmts := make([]ast.Stmt, 0, 10)
-
 	for !p.check(scanner.RightBrace) {
 		declaration, err := p.declaration()
 		if err != nil {
-			return nil, err
+			p.errorReporter.PopLastErr()
+			return nil, p.errorReporter.Report(p.prev(), msg)
 		}
 		stmts = append(stmts, declaration)
 	}
-	_, err := p.consume(scanner.RightBrace, "expected '}' after block")
+	_, err := p.consume(scanner.RightBrace, msg)
 	return stmts, err
 
 }

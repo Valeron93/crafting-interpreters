@@ -62,7 +62,7 @@ func (s *Scanner) addTokenLiteral(typ TokenType, literal any) {
 		Lexeme:  text,
 		Literal: literal,
 		Line:    s.line,
-		Column:  s.column - len(text) + 1,
+		Column:  s.column + 1,
 	})
 }
 
