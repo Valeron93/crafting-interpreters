@@ -18,10 +18,18 @@ const (
 	functionMethod
 )
 
+type classType int
+
+const (
+	classNone classType = iota
+	classClass
+)
+
 type Resolver struct {
 	interpreter     *interpreter.Interpreter
 	scopes          stack.Stack[scopeMap]
 	currentFunction funcType
+	currentClass    classType
 	errs            []error
 }
 

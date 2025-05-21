@@ -64,6 +64,8 @@ func (r *Resolver) VisitWhileStmt(stmt *ast.WhileStmt) (any, error) {
 }
 
 func (r *Resolver) VisitClassDeclStmt(stmt *ast.ClassDeclStmt) (any, error) {
+	enclosingClass := r.currentClass
+	r.currentClass = classClass
 	r.declare(stmt.Name)
 	r.define(stmt.Name)
 
@@ -74,5 +76,6 @@ func (r *Resolver) VisitClassDeclStmt(stmt *ast.ClassDeclStmt) (any, error) {
 		r.resolveFunction(method.Params, method.Body, declaration)
 	}
 	r.endScope()
+	r.currentClass = enclosingClass
 	return nil, nil
 }

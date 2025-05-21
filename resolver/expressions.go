@@ -77,6 +77,12 @@ func (r *Resolver) VisitSetExpr(expr *ast.SetExpr) (any, error) {
 }
 
 func (r *Resolver) VisitThisExpr(expr *ast.ThisExpr) (any, error) {
+
+	if r.currentClass == classNone {
+		r.addError(util.ReportErrorOnToken(expr.Keyword, "cannot use this outside of class method"))
+		return nil, nil
+	}
+
 	r.resolveLocal(expr, expr.Keyword)
 	return nil, nil
 }
