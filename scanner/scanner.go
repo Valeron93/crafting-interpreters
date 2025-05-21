@@ -12,6 +12,7 @@ type Scanner struct {
 	start   int
 	current int
 	line    int
+	column  int
 }
 
 func NewScanner(source string) Scanner {
@@ -21,6 +22,7 @@ func NewScanner(source string) Scanner {
 		start:   0,
 		current: 0,
 		line:    1,
+		column:  1,
 	}
 }
 
@@ -60,12 +62,14 @@ func (s *Scanner) addTokenLiteral(typ TokenType, literal any) {
 		Lexeme:  text,
 		Literal: literal,
 		Line:    s.line,
+		Column:  s.column - len(text) + 1,
 	})
 }
 
 func (s *Scanner) advance() rune {
 	r := s.source[s.current]
 	s.current++
+	s.column++
 	return r
 }
 
@@ -109,6 +113,7 @@ func (s *Scanner) scanToken() error {
 
 	case '\n':
 		s.line++
+		s.column = 0
 
 	case '"':
 		err := s.string()
@@ -210,7 +215,7 @@ func (s *Scanner) string() error {
 }
 
 func (s *Scanner) error(err string) error {
-	return fmt.Errorf("line %v: %v", s.line, err)
+	return fmt.Errorf("%v:%v: %v", s.line, s.column, err)
 }
 
 func isDigit(r rune) bool {

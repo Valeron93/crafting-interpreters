@@ -36,6 +36,6 @@ func (t *TokenErrorReporter) Clear() {
 
 func ReportErrorOnToken(token scanner.Token, format string, args ...any) error {
 	end := fmt.Sprintf(format, args...)
-	err := fmt.Errorf("%v: %s", token.Line, end)
+	err := fmt.Errorf("%v:%v %s", token.Line, token.Column, end)
 	return err
 }

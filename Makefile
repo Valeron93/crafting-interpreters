@@ -11,4 +11,7 @@ build:
 clean:
 	rm -rf build/
 
+fmt:
+	go fmt ./parser ./interpreter ./scanner ./cmd/astgen ./stack ./util ./resolver
+
 .PHONY: build

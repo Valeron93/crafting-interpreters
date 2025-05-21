@@ -29,26 +29,25 @@ func runString(i *interpreter.Interpreter, r *resolver.Resolver, code string, fi
 
 	if len(errs) > 0 {
 		for _, err := range errs {
-			fmt.Fprintf(os.Stderr, "%v\n", err)
+			fmt.Fprintf(os.Stderr, "%v:%v\n", fileName, err)
 		}
 		return false
 	}
 
 	p := parser.NewParser(tokens)
 	expression, reporter := p.Parse()
-	if len(errs) > 0 {
-		for _, err := range errs {
-			fmt.Fprintf(os.Stderr, "%v\n", err)
+	if reporter.HasErrors() {
+		for _, err := range reporter.Errors() {
+			fmt.Fprintf(os.Stderr, "%v:%v\n", fileName, err)
 		}
 		return false
 	}
-
 
 	r.ResolveStatements(expression)
 	reporter = r.ErrorReporter()
 	if reporter.HasErrors() {
 		for _, err := range reporter.Errors() {
-			fmt.Fprintf(os.Stderr, "%v\n", err)
+			fmt.Fprintf(os.Stderr, "%v:%v\n", fileName, err)
 		}
 		return false
 	}
