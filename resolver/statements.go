@@ -2,6 +2,7 @@ package resolver
 
 import (
 	"github.com/Valeron93/crafting-interpreters/ast"
+	"github.com/Valeron93/crafting-interpreters/util"
 )
 
 func (r *Resolver) VisitExprStmt(stmt *ast.ExprStmt) (any, error) {
@@ -13,7 +14,7 @@ func (r *Resolver) VisitFuncDeclStmt(stmt *ast.FuncDeclStmt) (any, error) {
 	r.declare(stmt.Name)
 	r.define(stmt.Name)
 
-	r.resolveFunction(stmt.Params, stmt.Body)
+	r.resolveFunction(stmt.Params, stmt.Body, functionFunc)
 	return nil, nil
 }
 
@@ -35,6 +36,12 @@ func (r *Resolver) VisitBlockStmt(stmt *ast.BlockStmt) (any, error) {
 }
 
 func (r *Resolver) VisitReturnStmt(stmt *ast.ReturnStmt) (any, error) {
+
+	if r.currentFunction == functionNone {
+		r.addError(util.ReportErrorOnToken(stmt.Token, "return is allowed only in functions"))
+		return nil, nil
+	}
+
 	if stmt.Value != nil {
 		r.resolveExpr(stmt.Value)
 	}

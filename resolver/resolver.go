@@ -10,28 +10,35 @@ import (
 
 type scopeMap map[string]bool
 
+type funcType int
+
+const (
+	functionNone funcType = iota
+	functionFunc
+)
+
 type Resolver struct {
-	interpreter *interpreter.Interpreter
-	scopes      stack.Stack[scopeMap]
-	errs        util.TokenErrorReporter
+	interpreter     *interpreter.Interpreter
+	scopes          stack.Stack[scopeMap]
+	currentFunction funcType
+	errs            []error
 }
 
 func New(i *interpreter.Interpreter) *Resolver {
 	r := &Resolver{
 		interpreter: i,
-		errs:        util.NewTokenErrorReporter(),
+		errs:        make([]error, 0),
 	}
+	r.beginScope()
 	return r
 }
 
-func (r *Resolver) ErrorReporter() *util.TokenErrorReporter {
-	return &r.errs
-}
-
-func (r *Resolver) ResolveStatements(stmts []ast.Stmt) {
+func (r *Resolver) ResolveStatements(stmts []ast.Stmt) []error {
 	for _, stmt := range stmts {
 		r.resolveStmt(stmt)
 	}
+
+	return r.errs
 }
 
 func (r *Resolver) resolveStmt(stmt ast.Stmt) {
@@ -42,7 +49,9 @@ func (r *Resolver) resolveExpr(expr ast.Expr) {
 	expr.Accept(r)
 }
 
-func (r *Resolver) resolveFunction(params []scanner.Token, body []ast.Stmt) error {
+func (r *Resolver) resolveFunction(params []scanner.Token, body []ast.Stmt, typ funcType) {
+	enclosingFunction := r.currentFunction
+	r.currentFunction = typ
 	r.beginScope()
 	for _, param := range params {
 		r.declare(param)
@@ -50,7 +59,7 @@ func (r *Resolver) resolveFunction(params []scanner.Token, body []ast.Stmt) erro
 	}
 	r.ResolveStatements(body)
 	r.endScope()
-	return nil
+	r.currentFunction = enclosingFunction
 }
 
 func (r *Resolver) beginScope() {
@@ -58,9 +67,8 @@ func (r *Resolver) beginScope() {
 	r.scopes.Push(scope)
 }
 
-func (r *Resolver) endScope() error {
+func (r *Resolver) endScope() {
 	r.scopes.Pop()
-	return nil
 }
 
 func (r *Resolver) declare(name scanner.Token) {
@@ -69,7 +77,8 @@ func (r *Resolver) declare(name scanner.Token) {
 	}
 	scope := r.scopes.MustPeek()
 	if _, ok := scope[name.Lexeme]; ok {
-		r.errs.Report(name, "'%v' was already defined in this scope", name.Lexeme)
+		r.addError(util.ReportErrorOnToken(name, "'%v' was already defined in this scope", name.Lexeme))
+		return
 	}
 	scope[name.Lexeme] = false
 }
@@ -80,4 +89,12 @@ func (r *Resolver) define(name scanner.Token) {
 	}
 	scope := r.scopes.MustPeek()
 	scope[name.Lexeme] = true
+}
+
+func (r *Resolver) addError(err error) {
+	r.errs = append(r.errs, err)
+}
+
+func (r *Resolver) ClearErrors() {
+	r.errs = make([]error, 0)
 }

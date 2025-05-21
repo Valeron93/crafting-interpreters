@@ -22,27 +22,23 @@ func NewScanner(source string) Scanner {
 		start:   0,
 		current: 0,
 		line:    1,
-		column:  1,
+		column:  0,
 	}
 }
 
 func (s *Scanner) ScanTokens() ([]Token, []error) {
 
 	errors := []error{}
-
+	s.addToken(EOF)
 	for !s.isAtEnd() {
 		s.start = s.current
 		err := s.scanToken()
 		if err != nil {
 			errors = append(errors, err)
 		}
-
 	}
 
-	s.tokens = append(s.tokens, Token{
-		Type: EOF,
-		Line: s.line,
-	})
+	s.addToken(EOF)
 
 	return s.tokens, errors
 }
@@ -215,7 +211,7 @@ func (s *Scanner) string() error {
 }
 
 func (s *Scanner) error(err string) error {
-	return fmt.Errorf("%v:%v: %v", s.line, s.column, err)
+	return fmt.Errorf("%v:%v: %v", s.line, s.column+1, err)
 }
 
 func isDigit(r rune) bool {

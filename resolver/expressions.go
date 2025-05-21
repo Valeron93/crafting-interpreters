@@ -3,6 +3,7 @@ package resolver
 import (
 	"github.com/Valeron93/crafting-interpreters/ast"
 	"github.com/Valeron93/crafting-interpreters/scanner"
+	"github.com/Valeron93/crafting-interpreters/util"
 )
 
 func (r *Resolver) VisitAssignExpr(expr *ast.AssignExpr) (any, error) {
@@ -33,7 +34,7 @@ func (r *Resolver) VisitGroupingExpr(expr *ast.GroupingExpr) (any, error) {
 }
 
 func (r *Resolver) VisitLambdaExpr(expr *ast.LambdaExpr) (any, error) {
-	r.resolveFunction(expr.Params, expr.Body)
+	r.resolveFunction(expr.Params, expr.Body, functionFunc)
 	return nil, nil
 }
 
@@ -56,7 +57,7 @@ func (r *Resolver) VisitVarExpr(expr *ast.VarExpr) (any, error) {
 
 	if !r.scopes.Empty() {
 		if value, ok := r.scopes.MustPeek()[expr.Name.Lexeme]; ok && value == false {
-			r.errs.Report(expr.Name, "can't read local var in its own initializer")
+			r.addError(util.ReportErrorOnToken(expr.Name, "can't read local var in its own initializer"))
 		}
 	}
 

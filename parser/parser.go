@@ -7,16 +7,14 @@ import (
 )
 
 type Parser struct {
-	tokens        []scanner.Token
-	current       int
-	errorReporter util.TokenErrorReporter
+	tokens  []scanner.Token
+	current int
 }
 
 func NewParser(tokens []scanner.Token) Parser {
 	return Parser{
-		tokens:        tokens,
-		current:       0,
-		errorReporter: util.NewTokenErrorReporter(),
+		tokens:  tokens,
+		current: 1,
 	}
 }
 
@@ -71,7 +69,7 @@ func (p *Parser) consume(typ scanner.TokenType, msg string) (scanner.Token, erro
 	if p.check(typ) {
 		return p.advance(), nil
 	} else {
-		return scanner.Token{}, p.errorReporter.Report(p.prev(), "%v", msg)
+		return scanner.Token{}, util.ReportErrorOnToken(p.prev(), "%v", msg)
 	}
 }
 
@@ -99,7 +97,7 @@ func (p *Parser) assignment() (ast.Expr, error) {
 				Value: value,
 			}, nil
 		}
-		return nil, p.errorReporter.Report(equals, "invalid assignment")
+		return nil, util.ReportErrorOnToken(equals, "invalid assignment")
 	}
 	return expr, nil
 }
@@ -278,7 +276,7 @@ func (p *Parser) finishCall(callee ast.Expr) (ast.Expr, error) {
 
 		for p.match(scanner.Comma) {
 			if len(args) >= 127 {
-				return nil, p.errorReporter.Report(p.peek(), "function call has a limit of 127 arguments")
+				return nil, util.ReportErrorOnToken(p.peek(), "function call has a limit of 127 arguments")
 			}
 
 			expr, err := p.expression()
@@ -349,7 +347,7 @@ func (p *Parser) primary() (ast.Expr, error) {
 		return p.lambdaFunction()
 	}
 
-	return nil, p.errorReporter.Report(p.prev(), "expected expression")
+	return nil, util.ReportErrorOnToken(p.prev(), "expected expression, got '%v'", p.peek().Lexeme)
 }
 
 func (p *Parser) statement() (ast.Stmt, error) {
@@ -390,7 +388,7 @@ func (p *Parser) returnStatement() (ast.Stmt, error) {
 		var err error
 		value, err = p.expression()
 		if err != nil {
-			return nil, err
+			return nil, util.ReportErrorOnToken(token, "expected expression or ';' after return statement")
 		}
 	}
 
@@ -513,8 +511,7 @@ func (p *Parser) block() ([]ast.Stmt, error) {
 	for !p.check(scanner.RightBrace) {
 		declaration, err := p.declaration()
 		if err != nil {
-			p.errorReporter.PopLastErr()
-			return nil, p.errorReporter.Report(p.prev(), msg)
+			return nil, util.ReportErrorOnToken(p.peek(), msg)
 		}
 		stmts = append(stmts, declaration)
 	}
@@ -728,19 +725,20 @@ func (p *Parser) sync() {
 		p.advance()
 	}
 }
-func (p *Parser) Parse() ([]ast.Stmt, *util.TokenErrorReporter) {
+func (p *Parser) Parse() ([]ast.Stmt, []error) {
 
 	stmts := make([]ast.Stmt, 0, 100)
-
+	errs := make([]error, 0)
 	for !p.isAtEnd() {
 
 		stmt, err := p.declaration()
 		if err != nil {
 			p.sync()
+			errs = append(errs, err)
 		} else {
 			stmts = append(stmts, stmt)
 		}
 	}
 
-	return stmts, &p.errorReporter
+	return stmts, errs
 }

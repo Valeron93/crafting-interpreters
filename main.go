@@ -35,24 +35,23 @@ func runString(i *interpreter.Interpreter, r *resolver.Resolver, code string, fi
 	}
 
 	p := parser.NewParser(tokens)
-	expression, reporter := p.Parse()
-	if reporter.HasErrors() {
-		for _, err := range reporter.Errors() {
+	stmts, errs := p.Parse()
+	if len(errs) > 0 {
+		for _, err := range errs {
 			fmt.Fprintf(os.Stderr, "%v:%v\n", fileName, err)
 		}
 		return false
 	}
 
-	r.ResolveStatements(expression)
-	reporter = r.ErrorReporter()
-	if reporter.HasErrors() {
-		for _, err := range reporter.Errors() {
+	errs = r.ResolveStatements(stmts)
+	if len(errs) > 0 {
+		for _, err := range errs {
 			fmt.Fprintf(os.Stderr, "%v:%v\n", fileName, err)
 		}
 		return false
 	}
 
-	if err := i.Interpret(expression); err != nil {
+	if err := i.Interpret(stmts); err != nil {
 		fmt.Fprintf(os.Stderr, "%v:%v\n", fileName, err)
 		return false
 	}
@@ -88,6 +87,6 @@ func runPrompt() {
 			break
 		}
 		runString(&replInterpreter, replResolver, line, "<repl>")
-		replResolver.ErrorReporter().Clear()
+		replResolver.ClearErrors()
 	}
 }
