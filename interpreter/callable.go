@@ -19,11 +19,19 @@ type CallableObject struct {
 }
 
 type Class struct {
-	Name string
+	Name    string
+	Methods map[string]*CallableObject
 }
 
 func (c *Class) String() string {
 	return fmt.Sprintf("<class %v>", c.Name)
+}
+
+func (c *Class) FindMethod(name string) (*CallableObject, bool) {
+	if method, ok := c.Methods[name]; ok {
+		return method, true
+	}
+	return nil, false
 }
 
 type ClassInstance struct {
@@ -38,6 +46,10 @@ func (c *ClassInstance) Set(name scanner.Token, value any) {
 func (c *ClassInstance) Get(name scanner.Token) (any, error) {
 	if field, ok := c.Fields[name.Lexeme]; ok {
 		return field, nil
+	}
+
+	if method, ok := c.Class.FindMethod(name.Lexeme); ok {
+		return method, nil
 	}
 
 	return nil, util.ReportErrorOnToken(name, "undefined field '%v'", name.Lexeme)

@@ -15,6 +15,7 @@ type funcType int
 const (
 	functionNone funcType = iota
 	functionFunc
+	functionMethod
 )
 
 type Resolver struct {
