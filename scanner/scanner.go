@@ -210,8 +210,8 @@ func (s *Scanner) string() error {
 	return nil
 }
 
-func (s *Scanner) error(err string) error {
-	return fmt.Errorf("%v:%v: %v", s.line, s.column+1, err)
+func (s *Scanner) error(msg string) error {
+	return fmt.Errorf("%v:%v: %v", s.line, s.column+1, msg)
 }
 
 func isDigit(r rune) bool {

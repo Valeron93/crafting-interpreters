@@ -1,8 +1,6 @@
 package interpreter
 
 import (
-	"fmt"
-
 	"github.com/Valeron93/crafting-interpreters/scanner"
 	"github.com/Valeron93/crafting-interpreters/util"
 )
@@ -56,7 +54,7 @@ func (e *Environment) Assign(target scanner.Token, value any) error {
 		return e.enclosing.Assign(target, value)
 	}
 
-	return fmt.Errorf("'%v' is not defined", target.Lexeme)
+	return util.ReportErrorOnToken(target, "'%v' is not defined", target.Lexeme)
 }
 
 func (e *Environment) GetAt(distance int, name scanner.Token) (any, error) {

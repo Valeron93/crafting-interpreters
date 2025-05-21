@@ -2,7 +2,6 @@ package interpreter
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/Valeron93/crafting-interpreters/ast"
 	"github.com/Valeron93/crafting-interpreters/scanner"
@@ -73,7 +72,7 @@ func (i *Interpreter) VisitBinaryExpr(expr *ast.BinaryExpr) (any, error) {
 	} else if (lhsIsString && rhsIsString) && expr.Operator.Type == scanner.Plus {
 		return lhsString + rhsString, nil
 	} else {
-		return nil, fmt.Errorf("operands '%v' and '%v' are not compatible with binary operator '%v'", left, right, expr.Operator.Lexeme)
+		return nil, util.ReportErrorOnToken(expr.Operator, "operands '%v' and '%v' are not compatible with binary operator '%v'", left, right, expr.Operator.Lexeme)
 	}
 
 	return nil, errors.ErrUnsupported
@@ -138,11 +137,11 @@ func (i *Interpreter) VisitCallExpr(expr *ast.CallExpr) (any, error) {
 
 	f, ok := callee.(Callable)
 	if !ok {
-		return nil, fmt.Errorf("`%#v` is not callable", callee)
+		return nil, util.ReportErrorOnToken(expr.Paren, "'%#v' is not callable", callee)
 	}
 	arity, varArg := f.Arity()
 	if !varArg && len(args) != arity {
-		return nil, fmt.Errorf("function expects %v arguments, got: %v", arity, len(args))
+		return nil, util.ReportErrorOnToken(expr.Paren, "function '%v' expects %v arguments, got: %v", callee, arity, len(args))
 	}
 
 	return f.Call(i, args)

@@ -7,7 +7,10 @@ import (
 )
 
 func ReportErrorOnToken(token scanner.Token, format string, args ...any) error {
+	return ReportErrorOnLineAndColumn(token.Line, token.Column, format, args...)
+}
+
+func ReportErrorOnLineAndColumn(line int, column int, format string, args ...any) error {
 	end := fmt.Sprintf(format, args...)
-	err := fmt.Errorf("%v:%v: %s", token.Line, token.Column, end)
-	return err
+	return fmt.Errorf("%v:%v: %s", line, column, end)
 }
