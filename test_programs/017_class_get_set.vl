@@ -1,0 +1,12 @@
+class Test {
+
+}
+
+let test = Test();
+
+test.value = "str";
+
+print(test);
+print(test.value);
+test.value = "changed str";
+print(test.value);

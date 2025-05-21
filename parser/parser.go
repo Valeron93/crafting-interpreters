@@ -90,11 +90,18 @@ func (p *Parser) assignment() (ast.Expr, error) {
 			return nil, err
 		}
 
-		if varExpr, ok := expr.(*ast.VarExpr); ok {
-			name := varExpr.Name
+		switch expr := expr.(type) {
+		case *ast.VarExpr:
 			return &ast.AssignExpr{
-				Name:  name,
+				Name:  expr.Name,
 				Value: value,
+			}, nil
+
+		case *ast.GetExpr:
+			return &ast.SetExpr{
+				Object: expr.Object,
+				Name:   expr.Name,
+				Value:  value,
 			}, nil
 		}
 		return nil, util.ReportErrorOnToken(equals, "invalid assignment")

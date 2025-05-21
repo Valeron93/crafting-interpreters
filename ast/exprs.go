@@ -15,6 +15,7 @@ type ExprVisitor interface {
 	VisitCallExpr(*CallExpr) (any, error)
 	VisitLambdaExpr(*LambdaExpr) (any, error)
 	VisitGetExpr(*GetExpr) (any, error)
+	VisitSetExpr(*SetExpr) (any, error)
 }
 
 type Expr interface {
@@ -109,5 +110,15 @@ type GetExpr struct {
 
 func (g *GetExpr) Accept(visitor ExprVisitor) (any, error) {
 	return visitor.VisitGetExpr(g)
+}
+
+type SetExpr struct {
+	Object Expr
+	Name scanner.Token
+	Value Expr
+}
+
+func (s *SetExpr) Accept(visitor ExprVisitor) (any, error) {
+	return visitor.VisitSetExpr(s)
 }
 

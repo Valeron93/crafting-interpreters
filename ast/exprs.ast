@@ -14,3 +14,4 @@ AssignExpr   : Name scanner.Token, Value Expr
 CallExpr     : Callee Expr, Paren scanner.Token, Args []Expr
 LambdaExpr   : Params []scanner.Token, Body []Stmt
 GetExpr      : Object Expr, Name scanner.Token
+SetExpr      : Object Expr, Name scanner.Token, Value Expr

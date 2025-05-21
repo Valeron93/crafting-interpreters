@@ -172,5 +172,24 @@ func (i *Interpreter) VisitGetExpr(expr *ast.GetExpr) (any, error) {
 		return instance.Get(expr.Name)
 	}
 
-	return nil, util.ReportErrorOnToken(expr.Name, "only class instance have properties")
+	return nil, util.ReportErrorOnToken(expr.Name, "only class instances have properties")
+}
+
+func (i *Interpreter) VisitSetExpr(expr *ast.SetExpr) (any, error) {
+	object, err := i.Eval(expr.Object)
+	if err != nil {
+		return nil, err
+	}
+
+	if instance, ok := object.(*ClassInstance); ok {
+		value, err := i.Eval(expr.Value)
+		if err != nil {
+			return nil, err
+		}
+
+		instance.Set(expr.Name, value)
+		return value, nil
+	}
+
+	return nil, util.ReportErrorOnToken(expr.Name, "only class instances have properties ")
 }
