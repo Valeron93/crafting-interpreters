@@ -584,21 +584,24 @@ func (p *Parser) classDeclaration() (ast.Stmt, error) {
 	}
 
 	methods := make([]*ast.FuncDeclStmt, 0)
-	for !p.check(scanner.RightBrace) {
-		if p.match(scanner.Func) {
-			fn, err := p.function("function")
-			if err != nil {
-				return nil, util.ReportErrorOnToken(p.prev(), "expected a function in class body")
-			}
-			methods = append(methods, fn)
+	for !p.check(scanner.RightBrace) && !p.isAtEnd() {
+		if !p.check(scanner.Func) || !p.checkNext(scanner.Ident) {
+			return nil, util.ReportErrorOnToken(p.peek(), "only method declarations are allowed in class declaration")
 		}
+		p.match(scanner.Func)
+		fn, err := p.function("function")
+		if err != nil {
+			return nil, err
+		}
+		methods = append(methods, fn)
+
 	}
 
 	_, err = p.consume(scanner.RightBrace, "expected '}' after class body")
 	return &ast.ClassDeclStmt{
 		Name:    name,
 		Methods: methods,
-	}, nil
+	}, err
 }
 
 func (p *Parser) params() ([]scanner.Token, error) {
@@ -729,13 +732,16 @@ func (p *Parser) varDeclaration() (ast.Stmt, error) {
 }
 
 func (p *Parser) expressionStatement() (ast.Stmt, error) {
-	expr, err := p.expression()
+	expr, _ := p.expression()
+
+	_, err := p.consume(scanner.Semicolon, "expected ';' after expression")
 	if err != nil {
 		return nil, err
 	}
-	_, err = p.consume(scanner.Semicolon, "expected ';' after expression")
-	if err != nil {
-		return nil, err
+
+	// this allows us to insert semicolons without expressions before
+	if expr == nil {
+		expr = &ast.LiteralExpr{Value: nil}
 	}
 	return &ast.ExprStmt{
 		Expr: expr,
