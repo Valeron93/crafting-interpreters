@@ -102,8 +102,15 @@ func (i *Interpreter) VisitClassDeclStmt(stmt *ast.ClassDeclStmt) (any, error) {
 	i.env.Define(stmt.Name.Lexeme, nil)
 
 	methods := make(map[string]*CallableObject)
-
+	var init *CallableObject
 	for _, method := range stmt.Methods {
+		if method.Name.Lexeme == "init" {
+			init = &CallableObject{
+				Declaration: method,
+				Closure:     i.env,
+			}
+			continue
+		}
 		methods[method.Name.Lexeme] = &CallableObject{
 			Declaration: method,
 			Closure:     i.env,
@@ -111,8 +118,9 @@ func (i *Interpreter) VisitClassDeclStmt(stmt *ast.ClassDeclStmt) (any, error) {
 	}
 
 	class := &Class{
-		Name:    stmt.Name.Lexeme,
-		Methods: methods,
+		Name:        stmt.Name.Lexeme,
+		Methods:     methods,
+		Constructor: init,
 	}
 	i.env.Assign(stmt.Name, class)
 	return nil, nil
