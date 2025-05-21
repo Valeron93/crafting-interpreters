@@ -1,0 +1,10 @@
+class Test {
+    fn a() {
+        return 10;
+    }
+
+    fn b() => 1;
+}
+
+print(Test);
+print(Test());
