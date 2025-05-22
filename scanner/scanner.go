@@ -259,21 +259,42 @@ func isAlphaNumeric(r rune) bool {
 }
 
 func (s *Scanner) number() error {
-
+	// Integer part
 	for isDigit(s.peek()) {
 		s.advance()
 	}
 
+	// Fractional part
 	if s.peek() == '.' && isDigit(s.peekNext()) {
-		s.advance()
+		s.advance() // consume '.'
 		for isDigit(s.peek()) {
 			s.advance()
 		}
 	}
-	value, err := strconv.ParseFloat(string(s.source[s.start:s.current]), 64)
-	if err != nil {
-		return err
+
+	// Scientic notation
+	if s.peek() == 'e' || s.peek() == 'E' {
+		s.advance()
+
+		if s.peek() == '+' || s.peek() == '-' {
+			s.advance()
+		}
+
+		if !isDigit(s.peek()) {
+			return s.error("invalid scientific notation: missing digits after exponent")
+		}
+
+		for isDigit(s.peek()) {
+			s.advance()
+		}
 	}
+
+	valueStr := string(s.source[s.start:s.current])
+	value, err := strconv.ParseFloat(valueStr, 64)
+	if err != nil {
+		return s.error("invalid number: " + err.Error())
+	}
+
 	s.addTokenLiteral(Number, value)
 	return nil
 }
