@@ -192,21 +192,51 @@ func (s *Scanner) peekNext() rune {
 }
 
 func (s *Scanner) string() error {
+	var value []rune
+	escaped := false
 
-	for s.peek() != '"' && !s.isAtEnd() {
-		if s.peek() == '\n' {
-			s.line++
+	for !s.isAtEnd() {
+		c := s.peek()
+
+		if escaped {
+			switch c {
+			case '"':
+				value = append(value, '"')
+			case 'n':
+				value = append(value, '\n')
+			case 't':
+				value = append(value, '\t')
+			case 'r':
+				value = append(value, '\r')
+			case '\\':
+				value = append(value, '\\')
+			default:
+				value = append(value, '\\', c)
+			}
+			escaped = false
+		} else {
+			if c == '"' {
+				break
+			}
+			if c == '\\' {
+				escaped = true
+			} else {
+				if c == '\n' {
+					s.line++
+				}
+				value = append(value, c)
+			}
 		}
+
 		s.advance()
 	}
+
 	if s.isAtEnd() {
 		return s.error("unterminated string")
 	}
 	s.advance()
 
-	value := s.source[s.start+1 : s.current-1]
 	s.addTokenLiteral(String, string(value))
-
 	return nil
 }
 
@@ -245,7 +275,6 @@ func (s *Scanner) number() error {
 		return err
 	}
 	s.addTokenLiteral(Number, value)
-
 	return nil
 }
 

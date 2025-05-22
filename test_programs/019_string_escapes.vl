@@ -1,0 +1,9 @@
+print("Newlines:");
+print("Hello\nHello\nHello");
+
+print("Tabs:");
+print("Hello\tHello\tHello");
+print("Quotes: \"Hello, world\"");
+print("Slashes: \\");
+
+print("**** - Caret return: \rText");
