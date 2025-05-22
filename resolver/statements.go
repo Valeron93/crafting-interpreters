@@ -91,6 +91,7 @@ func (r *Resolver) VisitClassDeclStmt(stmt *ast.ClassDeclStmt) (any, error) {
 }
 
 func (r *Resolver) VisitMethodDeclStmt(stmt *ast.MethodDeclStmt) (any, error) {
-	r.resolveStmt(stmt)
+	// TODO: look: interpreter/interpreter.go: VisitMethodDeclStmt
+
 	return nil, nil
 }

@@ -128,6 +128,11 @@ func (i *Interpreter) VisitClassDeclStmt(stmt *ast.ClassDeclStmt) (any, error) {
 	return nil, nil
 }
 
-func (i *Interpreter) VisitMethodDeclStmt(*ast.MethodDeclStmt) (any, error) {
-	panic("unimplemented")
+func (i *Interpreter) VisitMethodDeclStmt(stmt *ast.MethodDeclStmt) (any, error) {
+	// we only need this function only to implement the StmtVisitor interface,
+	// since MethodDeclStmt are interpreted in the VisitClassDeclStmt
+	// and are not visited
+
+	// TODO: maybe, there is a better approach?
+	return nil, nil
 }
