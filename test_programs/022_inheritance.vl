@@ -1,0 +1,44 @@
+class Animal {
+    fn speak() {
+        print("Generic animal speaking");
+    }
+}
+
+class Mammal : Animal {
+    fn speak() {
+        super.speak();
+        print("Mammal speaking");
+    }
+}
+
+class Dog : Mammal {
+    fn speak() {
+        super.speak();
+        print("Bark");
+    }
+}
+
+class Cat : Mammal {
+    fn speak() {
+        super.speak();
+        print("Meow");
+    }
+}
+
+class Bird : Animal {
+    fn speak() {
+        super.speak();
+        print("Chirp");
+    }
+}
+
+print("dog speaking:");
+Dog().speak();
+print("-----------");
+
+print("cat speaking:");
+Cat().speak();
+print("-----------");
+
+print("bird speaking:");
+Bird().speak();

@@ -114,3 +114,15 @@ func (r *Resolver) VisitSetKeyExpr(expr *ast.SetKeyExpr) (any, error) {
 	r.resolveExpr(expr.Value)
 	return nil, nil
 }
+
+func (r *Resolver) VisitSuperExpr(expr *ast.SuperExpr) (any, error) {
+
+	if r.currentClass == classNone {
+		r.addError(util.ReportErrorOnToken(expr.Keyword, "cannot use 'super' outside of class"))
+	} else if r.currentClass != classSubclass {
+		r.addError(util.ReportErrorOnToken(expr.Keyword, "cannot use 'super' in a class without superclass"))
+	}
+
+	r.resolveLocal(expr, expr.Keyword)
+	return nil, nil
+}

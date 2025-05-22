@@ -50,11 +50,12 @@ func _() {
 	_ = x[While-39]
 	_ = x[EOF-40]
 	_ = x[Static-41]
+	_ = x[Colon-42]
 }
 
-const _TokenType_name = "LeftParenRightParenLeftBraceRightBraceLeftBracketRightBracketCommaDotMinusPlusSemicolonSlashStarBangBangEqualEqualEqualEqualGreaterGreaterEqualLessLessEqualArrowIdentStringNumberAndClassElseFalseFuncForIfNilOrReturnSuperThisTrueVarWhileEOFStatic"
+const _TokenType_name = "LeftParenRightParenLeftBraceRightBraceLeftBracketRightBracketCommaDotMinusPlusSemicolonSlashStarBangBangEqualEqualEqualEqualGreaterGreaterEqualLessLessEqualArrowIdentStringNumberAndClassElseFalseFuncForIfNilOrReturnSuperThisTrueVarWhileEOFStaticColon"
 
-var _TokenType_index = [...]uint8{0, 9, 19, 28, 38, 49, 61, 66, 69, 74, 78, 87, 92, 96, 100, 109, 114, 124, 131, 143, 147, 156, 161, 166, 172, 178, 181, 186, 190, 195, 199, 202, 204, 207, 209, 215, 220, 224, 228, 231, 236, 239, 245}
+var _TokenType_index = [...]uint8{0, 9, 19, 28, 38, 49, 61, 66, 69, 74, 78, 87, 92, 96, 100, 109, 114, 124, 131, 143, 147, 156, 161, 166, 172, 178, 181, 186, 190, 195, 199, 202, 204, 207, 209, 215, 220, 224, 228, 231, 236, 239, 245, 250}
 
 func (i TokenType) String() string {
 	if i < 0 || i >= TokenType(len(_TokenType_index)-1) {

@@ -11,6 +11,7 @@ type Class struct {
 	Name        string
 	Methods     map[string]ClassMethod
 	Constructor Callable
+	Superclass  *Class
 }
 
 type ClassMethod struct {
@@ -53,6 +54,10 @@ func (c *Class) FindMethod(name string) (Callable, bool) {
 	if method, ok := c.Methods[name]; ok {
 		return method.Callable, !method.Static
 	}
+	if c.Superclass != nil {
+		return c.Superclass.FindMethod(name)
+	}
+
 	return nil, false
 }
 

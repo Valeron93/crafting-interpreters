@@ -373,6 +373,23 @@ func (p *Parser) primary() (ast.Expr, error) {
 		}, nil
 	}
 
+	if p.match(scanner.Super) {
+		keyword := p.prev()
+		_, err := p.consume(scanner.Dot, "expected '.' after 'super'")
+		if err != nil {
+			return nil, err
+		}
+		method, err := p.consume(scanner.Ident, "expected method name after 'super'")
+		if err != nil {
+			return nil, err
+		}
+
+		return &ast.SuperExpr{
+			Keyword: keyword,
+			Method:  method,
+		}, nil
+	}
+
 	if p.match(scanner.Ident) {
 		return &ast.VarExpr{
 			Name: p.prev(),
@@ -627,6 +644,17 @@ func (p *Parser) classDeclaration() (ast.Stmt, error) {
 	if err != nil {
 		return nil, err
 	}
+	var superclass *ast.VarExpr
+	if p.match(scanner.Colon) {
+		superclassName, err := p.consume(scanner.Ident, "expected superclass name")
+		if err != nil {
+			return nil, err
+		}
+
+		superclass = &ast.VarExpr{
+			Name: superclassName,
+		}
+	}
 
 	_, err = p.consume(scanner.LeftBrace, "expected '{' before class body")
 	if err != nil {
@@ -653,8 +681,9 @@ func (p *Parser) classDeclaration() (ast.Stmt, error) {
 
 	_, err = p.consume(scanner.RightBrace, "expected '}' after class body")
 	return &ast.ClassDeclStmt{
-		Name:    name,
-		Methods: methods,
+		Name:       name,
+		Methods:    methods,
+		Superclass: superclass,
 	}, err
 }
 

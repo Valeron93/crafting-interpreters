@@ -247,3 +247,38 @@ func (i *Interpreter) VisitSetKeyExpr(expr *ast.SetKeyExpr) (any, error) {
 	return nil, util.ReportErrorOnToken(expr.Bracket, "indexing is not supported on this object")
 
 }
+
+func (i *Interpreter) VisitSuperExpr(expr *ast.SuperExpr) (any, error) {
+	distance := i.locals[expr]
+
+	super, err := i.env.GetAt(distance, expr.Keyword)
+	if err != nil {
+		return nil, err
+	}
+
+	superclass, ok := super.(*Class)
+	if !ok {
+		return nil, util.ReportErrorOnToken(expr.Keyword, "failed to find superclass")
+	}
+
+	// copy the keyword so we can get location info
+	thisKeyword := expr.Keyword
+	thisKeyword.Lexeme = "this"
+	object, err := i.env.GetAt(distance-1, thisKeyword)
+	if err != nil {
+		return nil, err
+	}
+
+	instance, ok := object.(*ClassInstance)
+	if !ok {
+		return nil, util.ReportErrorOnToken(expr.Keyword, "failed to obtain instance")
+	}
+
+	method, ok := superclass.FindMethod(expr.Method.Lexeme)
+	if !ok {
+		return nil, util.ReportErrorOnToken(expr.Keyword, "'super' has no '%v' method", expr.Method.Lexeme)
+	}
+
+	return method.Bind(instance), nil
+
+}

@@ -55,6 +55,7 @@ const (
 	EOF
 
 	Static
+	Colon
 )
 
 var keywords = map[string]TokenType{

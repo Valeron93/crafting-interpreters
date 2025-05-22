@@ -98,6 +98,8 @@ func (s *Scanner) scanToken() error {
 		s.addToken(LeftBracket)
 	case ']':
 		s.addToken(RightBracket)
+	case ':':
+		s.addToken(Colon)
 
 	case '/':
 		if s.match('/') {

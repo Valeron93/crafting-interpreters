@@ -86,6 +86,7 @@ func (r *ReturnStmt) Accept(visitor StmtVisitor) (any, error) {
 type ClassDeclStmt struct {
 	Name scanner.Token
 	Methods []*MethodDeclStmt
+	Superclass *VarExpr
 }
 
 func (c *ClassDeclStmt) Accept(visitor StmtVisitor) (any, error) {

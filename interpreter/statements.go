@@ -2,6 +2,7 @@ package interpreter
 
 import (
 	"github.com/Valeron93/crafting-interpreters/ast"
+	"github.com/Valeron93/crafting-interpreters/util"
 )
 
 func (i *Interpreter) VisitVarStmt(stmt *ast.VarStmt) (any, error) {
@@ -99,7 +100,25 @@ func (i *Interpreter) VisitReturnStmt(stmt *ast.ReturnStmt) (any, error) {
 }
 
 func (i *Interpreter) VisitClassDeclStmt(stmt *ast.ClassDeclStmt) (any, error) {
+	var superclass *Class
+	if stmt.Superclass != nil {
+		class, err := i.Eval(stmt.Superclass)
+		if err != nil {
+			return nil, err
+		}
+
+		if class, ok := class.(*Class); ok {
+			superclass = class
+		} else {
+			return nil, util.ReportErrorOnToken(stmt.Superclass.Name, "'%v' is not a class", stmt.Superclass.Name.Lexeme)
+		}
+	}
 	i.env.Define(stmt.Name.Lexeme, nil)
+
+	if stmt.Superclass != nil {
+		i.env = NewSubEnvironment(i.env)
+		i.env.Define("super", superclass)
+	}
 
 	methods := make(map[string]ClassMethod)
 	var init Callable
@@ -123,7 +142,13 @@ func (i *Interpreter) VisitClassDeclStmt(stmt *ast.ClassDeclStmt) (any, error) {
 		Name:        stmt.Name.Lexeme,
 		Methods:     methods,
 		Constructor: init,
+		Superclass:  superclass,
 	}
+
+	if superclass != nil {
+		i.env = i.env.enclosing
+	}
+
 	i.env.Assign(stmt.Name, class)
 	return nil, nil
 }

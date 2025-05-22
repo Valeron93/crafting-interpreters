@@ -23,6 +23,7 @@ type classType int
 const (
 	classNone classType = iota
 	classClass
+	classSubclass
 )
 
 type Resolver struct {

@@ -69,6 +69,19 @@ func (r *Resolver) VisitClassDeclStmt(stmt *ast.ClassDeclStmt) (any, error) {
 	r.declare(stmt.Name)
 	r.define(stmt.Name)
 
+	if stmt.Superclass != nil {
+		if stmt.Name.Lexeme == stmt.Superclass.Name.Lexeme {
+			r.addError(util.ReportErrorOnToken(stmt.Superclass.Name, "class cannot inherit from itself"))
+		}
+		r.currentClass = classSubclass
+		r.resolveExpr(stmt.Superclass)
+	}
+
+	if stmt.Superclass != nil {
+		r.beginScope()
+		r.scopes.MustPeek()["super"] = true
+	}
+
 	r.beginScope()
 	scope := r.scopes.MustPeek()
 	for _, method := range stmt.Methods {
@@ -85,6 +98,11 @@ func (r *Resolver) VisitClassDeclStmt(stmt *ast.ClassDeclStmt) (any, error) {
 	}
 
 	r.endScope()
+
+	if stmt.Superclass != nil {
+		r.endScope()
+	}
+
 	r.currentClass = enclosingClass
 
 	return nil, nil
