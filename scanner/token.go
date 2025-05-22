@@ -49,6 +49,8 @@ const (
 	Var
 	While
 	EOF
+
+	Static
 )
 
 var keywords = map[string]TokenType{
@@ -67,6 +69,7 @@ var keywords = map[string]TokenType{
 	"true":   True,
 	"let":    Var,
 	"while":  While,
+	"static": Static,
 }
 
 type Token struct {

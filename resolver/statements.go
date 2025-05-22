@@ -70,13 +70,27 @@ func (r *Resolver) VisitClassDeclStmt(stmt *ast.ClassDeclStmt) (any, error) {
 	r.define(stmt.Name)
 
 	r.beginScope()
-	r.scopes.MustPeek()["this"] = true
+	scope := r.scopes.MustPeek()
 	for _, method := range stmt.Methods {
-		declaration := functionMethod
-		r.declare(method.Name)
-		r.resolveFunction(method.Params, method.Body, declaration)
+		var declaration funcType
+		if !method.Static {
+			declaration = functionMethod
+			scope["this"] = true
+		} else {
+			r.declare(method.Func.Name)
+			declaration = functionFunc
+			delete(scope, "this")
+		}
+		r.resolveFunction(method.Func.Params, method.Func.Body, declaration)
 	}
+
 	r.endScope()
 	r.currentClass = enclosingClass
+
+	return nil, nil
+}
+
+func (r *Resolver) VisitMethodDeclStmt(stmt *ast.MethodDeclStmt) (any, error) {
+	r.resolveStmt(stmt)
 	return nil, nil
 }

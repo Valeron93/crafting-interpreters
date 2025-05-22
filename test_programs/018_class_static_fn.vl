@@ -1,0 +1,16 @@
+class StringPrinter {
+    fn init(str) {
+        this.string = str;
+    }
+
+    static fn new_hello_world() {
+        return StringPrinter("Hello, world! - from static constructor");
+    }
+
+    fn speak() {
+        print(this.string);
+    }
+}
+
+StringPrinter("Hello, world! - from init constructor").speak();
+StringPrinter.new_hello_world().speak();

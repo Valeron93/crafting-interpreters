@@ -47,11 +47,12 @@ func _() {
 	_ = x[Var-36]
 	_ = x[While-37]
 	_ = x[EOF-38]
+	_ = x[Static-39]
 }
 
-const _TokenType_name = "LeftParenRightParenLeftBraceRightBraceCommaDotMinusPlusSemicolonSlashStarBangBangEqualEqualEqualEqualGreaterGreaterEqualLessLessEqualArrowIdentStringNumberAndClassElseFalseFuncForIfNilOrReturnSuperThisTrueVarWhileEOF"
+const _TokenType_name = "LeftParenRightParenLeftBraceRightBraceCommaDotMinusPlusSemicolonSlashStarBangBangEqualEqualEqualEqualGreaterGreaterEqualLessLessEqualArrowIdentStringNumberAndClassElseFalseFuncForIfNilOrReturnSuperThisTrueVarWhileEOFStatic"
 
-var _TokenType_index = [...]uint8{0, 9, 19, 28, 38, 43, 46, 51, 55, 64, 69, 73, 77, 86, 91, 101, 108, 120, 124, 133, 138, 143, 149, 155, 158, 163, 167, 172, 176, 179, 181, 184, 186, 192, 197, 201, 205, 208, 213, 216}
+var _TokenType_index = [...]uint8{0, 9, 19, 28, 38, 43, 46, 51, 55, 64, 69, 73, 77, 86, 91, 101, 108, 120, 124, 133, 138, 143, 149, 155, 158, 163, 167, 172, 176, 179, 181, 184, 186, 192, 197, 201, 205, 208, 213, 216, 222}
 
 func (i TokenType) String() string {
 	if i < 0 || i >= TokenType(len(_TokenType_index)-1) {

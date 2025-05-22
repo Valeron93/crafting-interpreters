@@ -1,11 +1,21 @@
 package interpreter
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/Valeron93/crafting-interpreters/scanner"
+	"github.com/Valeron93/crafting-interpreters/util"
+)
 
 type Class struct {
 	Name        string
-	Methods     map[string]*CallableObject
+	Methods     map[string]ClassMethod
 	Constructor *CallableObject
+}
+
+type ClassMethod struct {
+	Callable *CallableObject
+	Static   bool
 }
 
 func (c *Class) Call(i *Interpreter, args []any) (any, error) {
@@ -37,7 +47,18 @@ func (c *Class) String() string {
 
 func (c *Class) FindMethod(name string) (*CallableObject, bool) {
 	if method, ok := c.Methods[name]; ok {
-		return method, true
+		return method.Callable, !method.Static
 	}
 	return nil, false
+}
+
+func (c *Class) Set(name scanner.Token, value any) error {
+	return util.ReportErrorOnToken(name, "assigning to class object is not supported")
+}
+
+func (c *Class) Get(name scanner.Token) (any, error) {
+	if method, ok := c.Methods[name.Lexeme]; ok {
+		return method.Callable, nil
+	}
+	return nil, util.ReportErrorOnToken(name, "class '%v' has no static method '%v'", c.Name, name.Lexeme)
 }

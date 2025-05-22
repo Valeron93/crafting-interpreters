@@ -12,8 +12,9 @@ type ClassInstance struct {
 	Fields map[string]any
 }
 
-func (c *ClassInstance) Set(name scanner.Token, value any) {
+func (c *ClassInstance) Set(name scanner.Token, value any) error {
 	c.Fields[name.Lexeme] = value
+	return nil
 }
 
 func (c *ClassInstance) Get(name scanner.Token) (any, error) {

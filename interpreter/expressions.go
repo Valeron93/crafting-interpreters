@@ -167,11 +167,11 @@ func (i *Interpreter) VisitGetExpr(expr *ast.GetExpr) (any, error) {
 		return nil, err
 	}
 
-	if instance, ok := object.(*ClassInstance); ok {
-		return instance.Get(expr.Name)
+	if object, ok := object.(Object); ok {
+		return object.Get(expr.Name)
 	}
 
-	return nil, util.ReportErrorOnToken(expr.Name, "only class instances have properties")
+	return nil, util.ReportErrorOnToken(expr.Name, "only classes and class instances have properties")
 }
 
 func (i *Interpreter) VisitSetExpr(expr *ast.SetExpr) (any, error) {
@@ -180,13 +180,16 @@ func (i *Interpreter) VisitSetExpr(expr *ast.SetExpr) (any, error) {
 		return nil, err
 	}
 
-	if instance, ok := object.(*ClassInstance); ok {
+	if obj, ok := object.(Object); ok {
 		value, err := i.Eval(expr.Value)
 		if err != nil {
 			return nil, err
 		}
 
-		instance.Set(expr.Name, value)
+		err = obj.Set(expr.Name, value)
+		if err != nil {
+			return nil, err
+		}
 		return value, nil
 	}
 

@@ -101,22 +101,24 @@ func (i *Interpreter) VisitReturnStmt(stmt *ast.ReturnStmt) (any, error) {
 func (i *Interpreter) VisitClassDeclStmt(stmt *ast.ClassDeclStmt) (any, error) {
 	i.env.Define(stmt.Name.Lexeme, nil)
 
-	methods := make(map[string]*CallableObject)
+	methods := make(map[string]ClassMethod)
 	var init *CallableObject
 	for _, method := range stmt.Methods {
-		if method.Name.Lexeme == "init" {
+		if method.Func.Name.Lexeme == "init" {
 			init = &CallableObject{
-				Declaration: method,
+				Declaration: method.Func,
 				Closure:     i.env,
 			}
 			continue
 		}
-		methods[method.Name.Lexeme] = &CallableObject{
-			Declaration: method,
-			Closure:     i.env,
+		methods[method.Func.Name.Lexeme] = ClassMethod{
+			Callable: &CallableObject{
+				Declaration: method.Func,
+				Closure:     i.env,
+			},
+			Static: method.Static,
 		}
 	}
-
 	class := &Class{
 		Name:        stmt.Name.Lexeme,
 		Methods:     methods,
@@ -124,4 +126,8 @@ func (i *Interpreter) VisitClassDeclStmt(stmt *ast.ClassDeclStmt) (any, error) {
 	}
 	i.env.Assign(stmt.Name, class)
 	return nil, nil
+}
+
+func (i *Interpreter) VisitMethodDeclStmt(*ast.MethodDeclStmt) (any, error) {
+	panic("unimplemented")
 }

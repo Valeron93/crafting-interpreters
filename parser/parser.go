@@ -606,18 +606,22 @@ func (p *Parser) classDeclaration() (ast.Stmt, error) {
 		return nil, err
 	}
 
-	methods := make([]*ast.FuncDeclStmt, 0)
+	methods := make([]*ast.MethodDeclStmt, 0)
 	for !p.check(scanner.RightBrace) && !p.isAtEnd() {
+		static := p.match(scanner.Static)
+
 		if !p.check(scanner.Func) || !p.checkNext(scanner.Ident) {
 			return nil, util.ReportErrorOnToken(p.peek(), "only method declarations are allowed in class declaration")
 		}
 		p.match(scanner.Func)
-		fn, err := p.function("function")
+		fn, err := p.function("method")
 		if err != nil {
 			return nil, err
 		}
-		methods = append(methods, fn)
-
+		methods = append(methods, &ast.MethodDeclStmt{
+			Func:   fn,
+			Static: static,
+		})
 	}
 
 	_, err = p.consume(scanner.RightBrace, "expected '}' after class body")
