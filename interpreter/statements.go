@@ -102,7 +102,7 @@ func (i *Interpreter) VisitClassDeclStmt(stmt *ast.ClassDeclStmt) (any, error) {
 	i.env.Define(stmt.Name.Lexeme, nil)
 
 	methods := make(map[string]ClassMethod)
-	var init *CallableObject
+	var init Callable
 	for _, method := range stmt.Methods {
 		if method.Func.Name.Lexeme == "init" {
 			init = &CallableObject{

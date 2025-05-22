@@ -16,6 +16,10 @@ func (c *ClockFunction) Arity() (int, bool) {
 	return 0, false
 }
 
+func (c *ClockFunction) Bind(this any) Callable {
+	return c
+}
+
 type PrintFunction struct {
 }
 
@@ -29,4 +33,8 @@ func (p *PrintFunction) Call(i *Interpreter, args []any) (any, error) {
 
 func (p *PrintFunction) Arity() (int, bool) {
 	return 0, true
+}
+
+func (p *PrintFunction) Bind(this any) Callable {
+	return p
 }

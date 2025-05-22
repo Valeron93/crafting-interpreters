@@ -10,11 +10,11 @@ import (
 type Class struct {
 	Name        string
 	Methods     map[string]ClassMethod
-	Constructor *CallableObject
+	Constructor Callable
 }
 
 type ClassMethod struct {
-	Callable *CallableObject
+	Callable Callable
 	Static   bool
 }
 
@@ -45,7 +45,11 @@ func (c *Class) String() string {
 	return fmt.Sprintf("<class %v>", c.Name)
 }
 
-func (c *Class) FindMethod(name string) (*CallableObject, bool) {
+func (c *Class) Bind(this any) Callable {
+	return c
+}
+
+func (c *Class) FindMethod(name string) (Callable, bool) {
 	if method, ok := c.Methods[name]; ok {
 		return method.Callable, !method.Static
 	}

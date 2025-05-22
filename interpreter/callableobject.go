@@ -11,10 +11,10 @@ type CallableObject struct {
 	Closure     *Environment
 }
 
-func (c *CallableObject) Bind(instance *ClassInstance) *CallableObject {
+func (c *CallableObject) Bind(this any) Callable {
 	env := NewSubEnvironment(c.Closure)
 
-	env.Define("this", instance)
+	env.Define("this", this)
 	return &CallableObject{
 		Declaration: c.Declaration,
 		Closure:     env,
