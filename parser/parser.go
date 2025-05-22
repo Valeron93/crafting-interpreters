@@ -103,7 +103,16 @@ func (p *Parser) assignment() (ast.Expr, error) {
 				Name:   expr.Name,
 				Value:  value,
 			}, nil
+
+		case *ast.GetKeyExpr:
+			return &ast.SetKeyExpr{
+				Object:  expr.Object,
+				Key:     expr.Key,
+				Value:   value,
+				Bracket: expr.Bracket,
+			}, nil
 		}
+
 		return nil, util.ReportErrorOnToken(equals, "invalid assignment")
 	}
 	return expr, nil
@@ -273,6 +282,24 @@ func (p *Parser) call() (ast.Expr, error) {
 				Object: expr,
 				Name:   name,
 			}
+		} else if p.check(scanner.LeftBracket) {
+			bracket := p.advance()
+			key, err := p.expression()
+			if err != nil {
+				return nil, err
+			}
+
+			_, err = p.consume(scanner.RightBracket, "expected ']' after expression")
+			if err != nil {
+				return nil, err
+			}
+
+			expr = &ast.GetKeyExpr{
+				Object:  expr,
+				Key:     key,
+				Bracket: bracket,
+			}
+
 		} else {
 			break
 		}

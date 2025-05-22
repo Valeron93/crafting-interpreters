@@ -94,6 +94,10 @@ func (s *Scanner) scanToken() error {
 		s.addToken(Semicolon)
 	case '*':
 		s.addToken(Star)
+	case '[':
+		s.addToken(LeftBracket)
+	case ']':
+		s.addToken(RightBracket)
 
 	case '/':
 		if s.match('/') {

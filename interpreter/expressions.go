@@ -199,3 +199,51 @@ func (i *Interpreter) VisitSetExpr(expr *ast.SetExpr) (any, error) {
 func (i *Interpreter) VisitThisExpr(expr *ast.ThisExpr) (any, error) {
 	return i.lookUpVar(expr.Keyword, expr)
 }
+
+func (i *Interpreter) VisitGetKeyExpr(expr *ast.GetKeyExpr) (any, error) {
+	object, err := i.Eval(expr.Object)
+	if err != nil {
+		return nil, err
+	}
+
+	if obj, ok := object.(IndexableObject); ok {
+
+		key, err := i.Eval(expr.Key)
+		if err != nil {
+			return nil, err
+		}
+
+		value, err := obj.GetKeyValue(i, expr.Bracket, key)
+		if err != nil {
+			return nil, err
+		}
+		return value, nil
+	}
+
+	return nil, util.ReportErrorOnToken(expr.Bracket, "indexing is only supported on objects")
+
+}
+
+func (i *Interpreter) VisitSetKeyExpr(expr *ast.SetKeyExpr) (any, error) {
+
+	object, err := i.Eval(expr.Object)
+	if err != nil {
+		return nil, err
+	}
+
+	if obj, ok := object.(IndexableObject); ok {
+		key, err := i.Eval(expr.Key)
+		if err != nil {
+			return nil, err
+		}
+
+		value, err := i.Eval(expr.Value)
+		if err != nil {
+			return nil, err
+		}
+
+		return nil, obj.SetKeyValue(i, expr.Bracket, key, value)
+	}
+	return nil, util.ReportErrorOnToken(expr.Bracket, "indexing is not supported on this object")
+
+}

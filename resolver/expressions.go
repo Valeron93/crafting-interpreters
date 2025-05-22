@@ -101,3 +101,16 @@ func (r *Resolver) resolveLocal(expr ast.Expr, name scanner.Token) {
 		r.addError(util.ReportErrorOnToken(name, "undefined variable: %v", name.Lexeme))
 	}
 }
+
+func (r *Resolver) VisitGetKeyExpr(expr *ast.GetKeyExpr) (any, error) {
+	r.resolveExpr(expr.Object)
+	r.resolveExpr(expr.Key)
+	return nil, nil
+}
+
+func (r *Resolver) VisitSetKeyExpr(expr *ast.SetKeyExpr) (any, error) {
+	r.resolveExpr(expr.Object)
+	r.resolveExpr(expr.Key)
+	r.resolveExpr(expr.Value)
+	return nil, nil
+}

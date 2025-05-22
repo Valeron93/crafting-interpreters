@@ -16,3 +16,5 @@ LambdaExpr   : Params []scanner.Token, Body []Stmt
 GetExpr      : Object Expr, Name scanner.Token
 SetExpr      : Object Expr, Name scanner.Token, Value Expr
 ThisExpr     : Keyword scanner.Token
+SetKeyExpr   : Object Expr, Key Expr, Value Expr, Bracket scanner.Token
+GetKeyExpr   : Object Expr, Key Expr, Bracket scanner.Token

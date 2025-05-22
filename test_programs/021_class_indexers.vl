@@ -1,0 +1,14 @@
+class Test {
+    fn __get(key) {
+        print("__get called, key: ", key);
+        return "__get return value";
+    }
+
+    fn __set(key, value) {
+        print("__set called, key: ", key, " value: ", value);
+    }
+}
+
+print(Test()["test"]);
+
+Test()["hello"] = "world";
